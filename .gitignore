@@ -1,0 +1,13 @@
+# Node.js modülleri
+node_modules/
+
+# Ortam değişkenleri
+.env
+
+# SQLite veritabanı dosyası ve klasörü
+database/
+
+# Frontend node_modules ve build dizini
+frontend/node_modules/
+frontend/dist/
+frontend/build/
