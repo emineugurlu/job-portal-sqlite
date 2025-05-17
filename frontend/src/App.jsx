@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Layout from './Layout'
+import Hero   from './Hero'      // 1) Hero bileşenini import ettik
 
 import Register from './Register'
 import Login    from './Login'
@@ -12,14 +13,15 @@ import Category from './Category'
 import Profile  from './Profile'
 
 export default function App() {
-  const [page, setPage]            = useState('jobs')
+  // 2) Varsayılan sayfayı artık 'home' olarak ayarladık
+  const [page, setPage]            = useState('home')
   const [token, setToken]          = useState(localStorage.getItem('token'))
   const [editingJobId, setEditing] = useState(null)
 
   const handleLogin = newToken => {
     localStorage.setItem('token', newToken)
     setToken(newToken)
-    setPage('jobs')
+    setPage('jobs')  // Girişten sonra ilanlar sayfasına yönlendir
   }
 
   const handleLogout = () => {
@@ -29,6 +31,11 @@ export default function App() {
   }
 
   const renderPage = () => {
+    // 3) 'home' sayfası yalnızca Hero bileşenini gösterir
+    if (page === 'home') {
+      return <Hero />
+    }
+
     switch (page) {
       case 'jobs':
         return (
@@ -59,15 +66,7 @@ export default function App() {
       case 'login':
         return !token ? <Login onLogin={handleLogin} /> : null
       default:
-        return (
-          <Jobs
-            token={token}
-            onEdit={id => {
-              setEditing(id)
-              setPage('edit')
-            }}
-          />
-        )
+        return null
     }
   }
 

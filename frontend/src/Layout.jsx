@@ -15,36 +15,31 @@ export default function Layout({ page, token, onNav, onLogout, children }) {
   const leftGroup = {
     display:    'flex',
     alignItems: 'center',
-    gap:        16,
-  };
-  const navStyle = {
-    display:    'flex',
     gap:        12,
-    marginLeft: 24,
   };
   const rightGroup = {
-    display: 'flex',
-    gap:     12,
-    alignItems: 'center'
+    display:    'flex',
+    alignItems: 'center',
+    gap:        12,
   };
   const btn = {
-    border:        'none',
-    padding:       '8px 16px',
-    borderRadius:  4,
-    cursor:        'pointer',
-    fontSize:      14,
-    background:    'transparent',
-    color:         '#fff',
+    border:       'none',
+    padding:      '8px 16px',
+    borderRadius: 4,
+    cursor:       'pointer',
+    fontSize:     14,
+    background:   'transparent',
+    color:        '#fff',
   };
   const btnPrimary = {
     ...btn,
-    background:    '#9575CD',  // açık mor
+    background: '#9575CD', // açık mor
   };
 
   return (
     <>
       <header style={headerStyle}>
-        {/* sol taraf: logo + menüler */}
+        {/* Logo ve başlık */}
         <div style={leftGroup}>
           <img
             src="/logo.png"
@@ -54,38 +49,49 @@ export default function Layout({ page, token, onNav, onLogout, children }) {
           <span style={{ fontSize: 20, fontWeight: 'bold' }}>
             JobPortal
           </span>
-          <nav style={navStyle}>
-            <button style={btn} onClick={() => onNav('jobs')}>
-              İlanlar
-            </button>
-            {token && (
-              <>
-                <button style={btn} onClick={() => onNav('new')}>
-                  Yeni İlan
-                </button>
-                <button style={btn} onClick={() => onNav('categories')}>
-                  Kategoriler
-                </button>
-                <button style={btn} onClick={() => onNav('profile')}>
-                  Profil
-                </button>
-              </>
-            )}
-          </nav>
         </div>
 
-        {/* sağ taraf: oturum butonları */}
+        {/* NAV MENÜ */}
         <div style={rightGroup}>
-          {!token ? (
+          {/* Anasayfa */}
+          <button style={btn} onClick={() => onNav('jobs')}>
+            Anasayfa
+          </button>
+
+          {/* İlanlar */}
+          <button style={btn} onClick={() => onNav('jobs')}>
+            İlanlar
+          </button>
+
+          {/* Sadece oturum açmış kullanıcılar */}
+          {token && (
             <>
-              <button style={btn} onClick={() => onNav('register')}>
+              <button style={btn} onClick={() => onNav('new')}>
+                Yeni İlan
+              </button>
+              <button style={btn} onClick={() => onNav('categories')}>
+                Kategoriler
+              </button>
+              <button style={btn} onClick={() => onNav('profile')}>
+                Profil
+              </button>
+            </>
+          )}
+
+          {/* Oturum yoksa: Kayıt & Giriş */}
+          {!token && (
+            <>
+              <button style={btn}        onClick={() => onNav('register')}>
                 Kayıt Ol
               </button>
               <button style={btnPrimary} onClick={() => onNav('login')}>
                 Giriş Yap
               </button>
             </>
-          ) : (
+          )}
+
+          {/* Oturum varsa: Çıkış */}
+          {token && (
             <button style={btnPrimary} onClick={onLogout}>
               Çıkış Yap
             </button>
