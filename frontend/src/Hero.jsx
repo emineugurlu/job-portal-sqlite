@@ -1,31 +1,45 @@
 // frontend/src/Hero.jsx
-import React from 'react';
+import React from 'react'
+import { motion } from 'framer-motion'
+import './Hero.css'  // keyframe animasyonu için
 
-export default function Hero() {
-  const style = {
-    container: {
-      background: '#7B1FA2', // mor ton
-      color: 'white',
-      padding: '80px 20px',
-      textAlign: 'center',
-    },
-    title: {
-      fontSize: '2.5rem',
-      marginBottom: '16px',
-      fontWeight: 'bold'
-    },
-    subtitle: {
-      fontSize: '1.25rem',
-      maxWidth: 600,
-      margin: '0 auto'
-    }
-  };
+export default function Hero({ onExplore }) {
   return (
-    <div style={style.container}>
-      <h1 style={style.title}>İŞ ARKADAŞI ARIYORUZ!</h1>
-      <p style={style.subtitle}>
-        Ekibimize katılacak yeni yetenekler arıyoruz. Özgeçmişinizi ve portföyünüzü <strong>merhaba@harikasite.com.tr</strong>’ye gönderin!
-      </p>
-    </div>
-  );
+    <section className="hero">
+      {/* yarı saydam overlay */}
+      <div className="hero-overlay" />
+
+      {/* animasyonlu başlık */}
+      <motion.h1
+        className="hero-title"
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
+        İş Arkadaşı Arıyoruz!
+      </motion.h1>
+
+      {/* animasyonlu alt metin */}
+      <motion.p
+        className="hero-subtitle"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.8 }}
+      >
+        Ekibimize katılacak yeni yetenekleri arıyoruz. Özgeçmişinizi{' '}
+        <strong>merhaba@harikasite.com.tr</strong>’ye gönderin!
+      </motion.p>
+
+      {/* çağrı butonu */}
+      <motion.button
+        className="hero-button"
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.6, duration: 0.5, type: 'spring' }}
+        onClick={onExplore}
+      >
+        İlanlara Göz At
+      </motion.button>
+    </section>
+  )
 }

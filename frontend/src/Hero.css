@@ -1,0 +1,64 @@
+/* frontend/src/Hero.css */
+
+.hero {
+  position:       relative;
+  width:          100%;
+  height:         80vh;
+  min-height:     500px;
+  display:        flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items:     center;
+  text-align:      center;
+  color:          white;
+  background:     url('/hero-bg.jpg') center/cover no-repeat;
+  overflow:        hidden;
+  font-family:    Arial, sans-serif;
+}
+
+/* Üstüne yarı saydam mor overlay */
+.hero-overlay {
+  position: absolute;
+  top:      0;
+  left:     0;
+  width:    100%;
+  height:   100%;
+  background: rgba(106, 27, 154, 0.6); /* #6A1B9A %60 opacity */
+  z-index: 1;
+}
+
+.hero-title {
+  position:    relative;
+  z-index:     2;
+  font-size:   3rem;
+  margin:      0;
+}
+
+.hero-subtitle {
+  position:    relative;
+  z-index:     2;
+  font-size:   1.2rem;
+  max-width:   600px;
+  margin-top:  16px;
+  line-height: 1.5;
+}
+
+.hero-button {
+  position:      relative;
+  z-index:       2;
+  margin-top:    32px;
+  padding:       12px 24px;
+  font-size:     1rem;
+  background:    white;
+  color:         #6A1B9A;
+  border:        none;
+  border-radius: 4px;
+  cursor:        pointer;
+  box-shadow:    0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Dalga filtresi animasyonu (isteğe bağlı) */
+@keyframes move {
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(50%, 50%); }
+}
