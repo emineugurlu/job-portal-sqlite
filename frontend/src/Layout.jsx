@@ -4,36 +4,51 @@ import React from 'react';
 export default function Layout({ page, token, onNav, onLogout, children }) {
   const headerStyle = {
     display:        'flex',
-    justifyContent: 'space-between',
     alignItems:     'center',
-    padding:        '0 24px',
-    height:         64,
-    background:     '#6A1B9A',   // derin mor
-    color:          '#fff',
-    fontFamily:     'Arial, sans-serif',
+    padding:        '0 20px',
+    height:         60,
+    background:     '#6A1B9A',  // koyu mor
+    color:          'white',
+    fontFamily:     'sans-serif',
   };
+
   const leftGroup = {
     display:    'flex',
     alignItems: 'center',
     gap:        12,
   };
-  const rightGroup = {
-    display:    'flex',
-    alignItems: 'center',
-    gap:        12,
+
+  const centerGroup = {
+    display:     'flex',
+    gap:         16,
+    marginLeft:  'auto',   // burası menüyü sağa iter
+    alignItems:  'center',
   };
-  const btn = {
+
+  const rightGroup = {
+    marginLeft: 16,
+  };
+
+  const btnBase = {
+    background:   'transparent',
     border:       'none',
-    padding:      '8px 16px',
+    color:        'white',
+    padding:      '8px 12px',
     borderRadius: 4,
     cursor:       'pointer',
     fontSize:     14,
-    background:   'transparent',
-    color:        '#fff',
   };
-  const btnPrimary = {
-    ...btn,
-    background: '#9575CD', // açık mor
+
+  const loginBtn = {
+    ...btnBase,
+    background: '#D1C4E9',   // açık mor
+    color:      '#4A148C',
+  };
+
+  const logoutBtn = {
+    ...btnBase,
+    background: '#F48FB1',   // yumuşak pembe
+    color:      '#6A1B9A',
   };
 
   return (
@@ -44,62 +59,54 @@ export default function Layout({ page, token, onNav, onLogout, children }) {
           <img
             src="/logo.png"
             alt="JobPortal"
-            style={{ height: 40, objectFit: 'contain' }}
+            style={{ height: 40, width: 40, objectFit: 'contain' }}
           />
-          <span style={{ fontSize: 20, fontWeight: 'bold' }}>
-            JobPortal
-          </span>
+          <span style={{ fontSize: 20, fontWeight: 'bold' }}>JobPortal</span>
         </div>
 
-        {/* NAV MENÜ */}
-        <div style={rightGroup}>
-          {/* Anasayfa */}
-          <button style={btn} onClick={() => onNav('jobs')}>
+        {/* Menü butonları */}
+        <nav style={centerGroup}>
+          <button style={btnBase} onClick={() => onNav('home')}>
             Anasayfa
           </button>
-
-          {/* İlanlar */}
-          <button style={btn} onClick={() => onNav('jobs')}>
+          <button style={btnBase} onClick={() => onNav('jobs')}>
             İlanlar
           </button>
-
-          {/* Sadece oturum açmış kullanıcılar */}
           {token && (
             <>
-              <button style={btn} onClick={() => onNav('new')}>
+              <button style={btnBase} onClick={() => onNav('new')}>
                 Yeni İlan
               </button>
-              <button style={btn} onClick={() => onNav('categories')}>
+              <button style={btnBase} onClick={() => onNav('categories')}>
                 Kategoriler
               </button>
-              <button style={btn} onClick={() => onNav('profile')}>
+              <button style={btnBase} onClick={() => onNav('profile')}>
                 Profil
               </button>
             </>
           )}
-
-          {/* Oturum yoksa: Kayıt & Giriş */}
           {!token && (
-            <>
-              <button style={btn}        onClick={() => onNav('register')}>
-                Kayıt Ol
-              </button>
-              <button style={btnPrimary} onClick={() => onNav('login')}>
-                Giriş Yap
-              </button>
-            </>
+            <button style={btnBase} onClick={() => onNav('register')}>
+              Kayıt Ol
+            </button>
           )}
+        </nav>
 
-          {/* Oturum varsa: Çıkış */}
-          {token && (
-            <button style={btnPrimary} onClick={onLogout}>
+        {/* Giriş / Çıkış butonları */}
+        <div style={rightGroup}>
+          {!token ? (
+            <button style={loginBtn} onClick={() => onNav('login')}>
+              Giriş Yap
+            </button>
+          ) : (
+            <button style={logoutBtn} onClick={onLogout}>
               Çıkış Yap
             </button>
           )}
         </div>
       </header>
 
-      <main style={{ padding: 24, minHeight: 'calc(100vh - 64px)' }}>
+      <main style={{ padding: 0 }}>
         {children}
       </main>
     </>

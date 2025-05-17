@@ -1,15 +1,28 @@
-// frontend/src/Hero.jsx
 import React from 'react'
 import { motion } from 'framer-motion'
-import './Hero.css'  // keyframe animasyonu için
+import './Hero.css'
 
 export default function Hero({ onExplore }) {
   return (
     <section className="hero">
-      {/* yarı saydam overlay */}
+      {/* Yarı saydam overlay */}
       <div className="hero-overlay" />
 
-      {/* animasyonlu başlık */}
+      {/* Dalga filtresi (isteğe bağlı) */}
+      <svg className="hero-svgFilter">
+        <filter id="wavy">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.01"
+            numOctaves="2"
+            seed="5"
+            result="noise"
+          />
+          <feDisplacementMap in2="noise" in="SourceGraphic" scale="20" />
+        </filter>
+      </svg>
+
+      {/* Başlık */}
       <motion.h1
         className="hero-title"
         initial={{ opacity: 0, y: -50 }}
@@ -19,7 +32,7 @@ export default function Hero({ onExplore }) {
         İş Arkadaşı Arıyoruz!
       </motion.h1>
 
-      {/* animasyonlu alt metin */}
+      {/* Alt metin */}
       <motion.p
         className="hero-subtitle"
         initial={{ opacity: 0, y: 30 }}
@@ -30,7 +43,7 @@ export default function Hero({ onExplore }) {
         <strong>merhaba@harikasite.com.tr</strong>’ye gönderin!
       </motion.p>
 
-      {/* çağrı butonu */}
+      {/* CTA Buton */}
       <motion.button
         className="hero-button"
         initial={{ scale: 0.8, opacity: 0 }}
@@ -40,6 +53,14 @@ export default function Hero({ onExplore }) {
       >
         İlanlara Göz At
       </motion.button>
+
+      {/* Keyframes */}
+      <style>{`
+        @keyframes move {
+          0%   { transform: translate(0, 0); }
+          100% { transform: translate(50%, 50%); }
+        }
+      `}</style>
     </section>
   )
 }

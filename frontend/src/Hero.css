@@ -1,5 +1,3 @@
-/* frontend/src/Hero.css */
-
 .hero {
   position:       relative;
   width:          100%;
@@ -57,7 +55,7 @@
   box-shadow:    0 4px 12px rgba(0,0,0,0.15);
 }
 
-/* Dalga filtresi animasyonu (isteğe bağlı) */
+/* (isteğe bağlı) Dalga filtresi animasyonu */
 @keyframes move {
   0%   { transform: translate(0, 0); }
   100% { transform: translate(50%, 50%); }

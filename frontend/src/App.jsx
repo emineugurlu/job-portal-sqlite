@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Layout from './Layout'
-import Hero   from './Hero'      // Hero bileşenini import ettik
+import Hero   from './Hero'
 
 import Register from './Register'
 import Login    from './Login'
@@ -11,15 +11,14 @@ import Category from './Category'
 import Profile  from './Profile'
 
 export default function App() {
-  // Başlangıçta ana sayfa (Hero)
-  const [page, setPage]            = useState('home')
+  const [page, setPage]            = useState('home') // artık home
   const [token, setToken]          = useState(localStorage.getItem('token'))
   const [editingJobId, setEditing] = useState(null)
 
   const handleLogin = newToken => {
     localStorage.setItem('token', newToken)
     setToken(newToken)
-    setPage('jobs')  // Girişten sonra ilanlar sayfasına yönlendir
+    setPage('jobs')
   }
 
   const handleLogout = () => {
@@ -29,9 +28,7 @@ export default function App() {
   }
 
   const renderPage = () => {
-    // 'home' için sadece Hero
     if (page === 'home') {
-      // onExplore ile ilanlar sayfasına geçiş yapıyoruz
       return <Hero onExplore={() => setPage('jobs')} />
     }
 
