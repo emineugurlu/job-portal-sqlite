@@ -1,33 +1,33 @@
 // frontend/src/App.jsx
-import React, { useState } from 'react';
-import Layout from './Layout.jsx';
 
-import Register  from './Register.jsx';
-import Login     from './Login.jsx';
-import Jobs      from './Jobs.jsx';
-import JobForm   from './JobForm.jsx';
-import JobEdit   from './JobEdit.jsx';
-import Category  from './Category.jsx';
-import Profile   from './Profile.jsx';
+import React, { useState } from 'react'
+import Layout from './Layout'
+
+import Register from './Register'
+import Login    from './Login'
+import Jobs     from './Jobs'
+import JobForm  from './JobForm'
+import JobEdit  from './JobEdit'
+import Category from './Category'
+import Profile  from './Profile'
 
 export default function App() {
-  const [page, setPage]            = useState('jobs');
-  const [token, setToken]          = useState(localStorage.getItem('token'));
-  const [editingJobId, setEditing] = useState(null);
+  const [page, setPage]            = useState('jobs')
+  const [token, setToken]          = useState(localStorage.getItem('token'))
+  const [editingJobId, setEditing] = useState(null)
 
   const handleLogin = newToken => {
-    localStorage.setItem('token', newToken);
-    setToken(newToken);
-    setPage('jobs');
-  };
+    localStorage.setItem('token', newToken)
+    setToken(newToken)
+    setPage('jobs')
+  }
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
-    setPage('login');
-  };
+    localStorage.removeItem('token')
+    setToken(null)
+    setPage('login')
+  }
 
-  // Hangi bileşenin görüntüleneceğini belirleyen fonksiyon
   const renderPage = () => {
     switch (page) {
       case 'jobs':
@@ -35,13 +35,13 @@ export default function App() {
           <Jobs
             token={token}
             onEdit={id => {
-              setEditing(id);
-              setPage('edit');
+              setEditing(id)
+              setPage('edit')
             }}
           />
-        );
+        )
       case 'new':
-        return token ? <JobForm onCreated={() => setPage('jobs')} /> : null;
+        return token ? <JobForm onCreated={() => setPage('jobs')} /> : null
       case 'edit':
         return (
           <JobEdit
@@ -49,19 +49,19 @@ export default function App() {
             onUpdated={() => setPage('jobs')}
             onCancel={() => setPage('jobs')}
           />
-        );
+        )
       case 'categories':
-        return <Category />;
+        return token ? <Category /> : null
       case 'profile':
-        return <Profile />;
+        return token ? <Profile /> : null
       case 'register':
-        return <Register />;
+        return !token ? <Register /> : null
       case 'login':
-        return <Login onLogin={handleLogin} />;
+        return !token ? <Login onLogin={handleLogin} /> : null
       default:
-        return <Jobs />;
+        return <Jobs token={token} onEdit={id => { setEditing(id); setPage('edit') }} />
     }
-  };
+  }
 
   return (
     <Layout
@@ -72,5 +72,5 @@ export default function App() {
     >
       {renderPage()}
     </Layout>
-  );
+  )
 }

@@ -1,86 +1,101 @@
 // frontend/src/Layout.jsx
-import React, { useState } from 'react';
-import {
-  AppBar,
-  Toolbar,
-  IconButton,
-  Typography,
-  Button,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  Box
-} from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
+import React from 'react';
 
-export default function Layout({ children, page, token, onNav, onLogout }) {
-  const [open, setOpen] = useState(false);
+export default function Layout({ page, token, onNav, onLogout, children }) {
+  const headerStyle = {
+    display:        'flex',
+    justifyContent: 'space-between',
+    alignItems:     'center',
+    padding:        '0 20px',
+    height:         60,
+    background:     '#4A148C', // deep purple
+    color:          'white',
+    fontFamily:     'sans-serif',
+  };
 
-  const pages = [
-    { label: 'İlanlar',     key: 'jobs' },
-    { label: 'Yeni İlan',   key: 'new' },
-    { label: 'Kategoriler', key: 'categories' },
-    { label: 'Profil',      key: 'profile' }
-  ];
+  const brandStyle = {
+    display:    'flex',
+    alignItems: 'center',
+    gap:        12,
+  };
+
+  const titleStyle = {
+    fontSize:   22,
+    fontWeight: 'bold',
+  };
+
+  const navStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 16,
+  };
+
+  const btnBase = {
+    border:       'none',
+    padding:      '6px 12px',
+    borderRadius: 4,
+    cursor:       'pointer',
+    fontSize:     14,
+  };
+
+  const linkBtn = {
+    ...btnBase,
+    background: 'transparent',
+    color:      'white',
+  };
+
+  const loginBtn = {
+    ...btnBase,
+    background: '#9575CD',  // light purple
+    color:      'white',
+  };
+
+  const logoutBtn = {
+    ...btnBase,
+    background: '#D1C4E9',  // pale purple
+    color:      '#4A148C',
+  };
 
   return (
     <>
-      <AppBar position="sticky">
-        <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            onClick={() => setOpen(true)}
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            JobPortal
-          </Typography>
+      <header style={headerStyle}>
+        {/* Sol: logo + başlık */}
+        <div style={brandStyle}>
+          <img
+            src="/logo.png"
+            alt="JobPortal"
+            style={{ height: 40, width: 40, objectFit: 'contain' }}
+          />
+          <span style={titleStyle}>JobPortal</span>
+        </div>
 
-          {token
-            ? <Button color="inherit" onClick={onLogout}>
-                Çıkış Yap
-              </Button>
-            : <Button color="inherit" onClick={() => onNav('login')}>
-                Giriş
-              </Button>
-          }
-        </Toolbar>
-      </AppBar>
+        {/* Sağ: navigasyon + auth butonları */}
+        <div style={navStyle}>
+          {/* Ortak menüler */}
+          <button style={linkBtn} onClick={() => onNav('jobs')}>İlanlar</button>
+          {!token && (
+            <button style={linkBtn} onClick={() => onNav('register')}>Kayıt</button>
+          )}
+          {token && (
+            <>
+              <button style={linkBtn} onClick={() => onNav('new')}>Yeni İlan</button>
+              <button style={linkBtn} onClick={() => onNav('categories')}>Kategoriler</button>
+              <button style={linkBtn} onClick={() => onNav('profile')}>Profil</button>
+            </>
+          )}
 
-      <Drawer open={open} onClose={() => setOpen(false)}>
-        <Box sx={{ width: 240 }} role="presentation">
-          <List>
-            {pages.map(p => (
-              <ListItem
-                button
-                key={p.key}
-                selected={page === p.key}
-                onClick={() => { onNav(p.key); setOpen(false); }}
-              >
-                <ListItemText primary={p.label} />
-              </ListItem>
-            ))}
+          {/* Auth butonları */}
+          {!token ? (
+            <button style={loginBtn} onClick={() => onNav('login')}>Giriş Yap</button>
+          ) : (
+            <button style={logoutBtn} onClick={onLogout}>Çıkış Yap</button>
+          )}
+        </div>
+      </header>
 
-            {!token && (
-              <ListItem
-                button
-                selected={page === 'register'}
-                onClick={() => { onNav('register'); setOpen(false); }}
-              >
-                <ListItemText primary="Kayıt Ol" />
-              </ListItem>
-            )}
-          </List>
-        </Box>
-      </Drawer>
-
-      <Box component="main" sx={{ p: 3 }}>
+      <main style={{ padding: 20 }}>
         {children}
-      </Box>
+      </main>
     </>
   );
 }

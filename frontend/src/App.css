@@ -1,71 +1,116 @@
-/* App.css */
+:root {
+  --primary:    #6A1B9A; /* derin mor */
+  --secondary:  #AB47BC; /* pastel mor */
+  --background: #F3E5F5; /* çok açık lavanta */
+  --text:       #212121; /* koyu gri */
+  --accent:     #00ACC1; /* turkuaz */
+}
 
-body {
+* {
+  box-sizing: border-box;
+}
+
+body, html, #root {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f0f2f5;
+  padding: 0;
+  height: 100%;
+  background: var(--background);
+  color: var(--text);
+  font-family: 'Segoe UI', Roboto, sans-serif;
 }
 
-.container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
+a {
+  color: var(--accent);
+  text-decoration: none;
 }
 
-.card {
-  background: #283593;       /* koyu indigo */
-  padding: 24px;
-  border-radius: 12px;
-  width: 320px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.card-header {
-  background: #fdd835;       /* sarı */
-  color: #283593;
-  text-align: center;
-  border-radius: 20px;
-  padding: 6px 0;
-  margin-bottom: 24px;
-  font-weight: bold;
-}
-
-.input {
-  width: 100%;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 20px;
-  margin-bottom: 16px;
-  font-size: 14px;
-}
-
-.input:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.6);
-}
-
-.btn {
-  width: 100%;
-  padding: 10px 0;
-  border: none;
-  border-radius: 20px;
-  background: #fff;
-  color: #283593;
-  font-weight: bold;
+button {
+  font-family: inherit;
   cursor: pointer;
-  margin-bottom: 12px;
+}
+
+/* Ortak “kart” sınıfı */
+.card {
+  background: white;
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Form kontrolleri */
+input, textarea, select {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--secondary);
+  border-radius: 4px;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Primary buton */
+.btn {
+  display: inline-block;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  text-align: center;
 }
 
 .btn:hover {
-  background: #f5f5f5;
+  background: var(--secondary);
 }
 
-.btn--facebook {
-  background: #1877f2;
-  color: #fff;
+/* Accent buton (link tarzı) */
+.btn-accent {
+  background: var(--accent);
+  color: white;
 }
 
-.btn--facebook:hover {
-  background: #166fe5;
+.btn-accent:hover {
+  opacity: 0.9;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--primary);
+  color: white;
+  padding: 0 1rem;
+  height: 56px;
+}
+
+.header .logo {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.nav-buttons > button {
+  margin-left: 0.5rem;
+  background: var(--secondary);
+  border: none;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+}
+
+.nav-buttons > button:hover {
+  background: var(--accent);
+}
+
+/* Main içeriği */
+.main {
+  padding: 2rem 1rem;
 }
