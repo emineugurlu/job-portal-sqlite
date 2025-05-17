@@ -59,7 +59,15 @@ export default function App() {
       case 'login':
         return !token ? <Login onLogin={handleLogin} /> : null
       default:
-        return <Jobs token={token} onEdit={id => { setEditing(id); setPage('edit') }} />
+        return (
+          <Jobs
+            token={token}
+            onEdit={id => {
+              setEditing(id)
+              setPage('edit')
+            }}
+          />
+        )
     }
   }
 

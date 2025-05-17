@@ -1,6 +1,5 @@
 // frontend/src/JobForm.jsx
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 export default function JobForm({ onCreated }) {
   const [form, setForm] = useState({
@@ -8,117 +7,139 @@ export default function JobForm({ onCreated }) {
     company: '',
     location: '',
     salary: '',
-    description: '',
-    categoryId: ''
+    description: ''
   });
-  const [cats, setCats] = useState([]);
   const [msg, setMsg] = useState('');
-
-  // Kategorileri yükle
-  useEffect(() => {
-    fetch('/api/categories')
-      .then(res => res.json())
-      .then(data => setCats(data))
-      .catch(err => console.error('Kategoriler alınamadı:', err));
-  }, []);
 
   const handleChange = e =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async e => {
     e.preventDefault();
-
     const token = localStorage.getItem('token');
-    if (!token) {
-      setMsg('Önce giriş yapmalısınız.');
-      return;
-    }
+    if (!token) return setMsg('Önce giriş yapmalısınız.');
 
     try {
       const res = await fetch('/api/jobs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(form)
       });
-
       const data = await res.json();
       if (res.ok) {
         setMsg('İlan oluşturuldu!');
-        onCreated();  // parent’a haber verir
-        setForm({     // formu sıfırla
-          title: '',
-          company: '',
-          location: '',
-          salary: '',
-          description: '',
-          categoryId: ''
-        });
-      } else if (res.status === 401 || res.status === 403) {
-        setMsg('Yetkisiz. Lütfen tekrar giriş yapın.');
+        onCreated();
+        setForm({ title:'', company:'', location:'', salary:'', description:'' });
       } else {
         setMsg(data.error || 'Oluşturulamadı.');
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       setMsg('Sunucuya bağlanılamadı.');
     }
   };
 
+  const container = {
+    maxWidth:     700,
+    margin:       '40px auto',
+    padding:      20,
+    borderRadius: 8,
+    background:   '#FFF',
+    boxShadow:    '0 4px 12px rgba(0,0,0,0.05)',
+    fontFamily:   'Arial, sans-serif'
+  };
+  const title = {
+    marginBottom: 24,
+    fontSize:     22,
+    fontWeight:   600,
+    color:        '#4A148C',
+    textAlign:    'center'
+  };
+  const formGrid = {
+    display:          'grid',
+    gridTemplateCols: 'repeat(auto-fit, minmax(240px, 1fr))',
+    gap:              16
+  };
+  const inputBase = {
+    width:         '100%',
+    padding:       '10px 12px',
+    borderRadius:  4,
+    border:        '1px solid #B39DDB',
+    outline:       'none',
+    fontSize:      14
+  };
+  const textarea = {
+    ...inputBase,
+    gridColumn: '1 / -1',
+    minHeight:  100,
+    resize:     'vertical'
+  };
+  const button = {
+    gridColumn:      '1 / -1',
+    padding:         '12px 0',
+    background:      '#6A1B9A',
+    color:           '#fff',
+    border:          'none',
+    borderRadius:    4,
+    fontSize:        16,
+    fontWeight:      500,
+    cursor:          'pointer'
+  };
+
   return (
-    <div style={{ maxWidth: 600, margin: 'auto', padding: 20 }}>
-      <h2>Yeni İş İlanı Oluştur</h2>
-      <form onSubmit={handleSubmit}>
+    <div style={container}>
+      <h2 style={title}>Yeni İş İlanı Oluştur</h2>
+      <form style={formGrid} onSubmit={handleSubmit}>
         <input
           name="title"
           placeholder="Başlık"
           value={form.title}
           onChange={handleChange}
+          style={inputBase}
           required
-        /><br/><br/>
+        />
         <input
           name="company"
           placeholder="Firma"
           value={form.company}
           onChange={handleChange}
+          style={inputBase}
           required
-        /><br/><br/>
+        />
         <input
           name="location"
           placeholder="Konum"
           value={form.location}
           onChange={handleChange}
+          style={inputBase}
           required
-        /><br/><br/>
-        <select
-          name="categoryId"
-          value={form.categoryId}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Kategori seçin</option>
-          {cats.map(c => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select><br/><br/>
+        />
         <input
           name="salary"
           placeholder="Maaş"
           value={form.salary}
           onChange={handleChange}
-        /><br/><br/>
+          style={inputBase}
+        />
         <textarea
           name="description"
           placeholder="Açıklama"
           value={form.description}
           onChange={handleChange}
+          style={textarea}
           required
-        /><br/><br/>
-        <button type="submit">Oluştur</button>
+        />
+        <button type="submit" style={button}>Oluştur</button>
       </form>
-      {msg && <p>{msg}</p>}
+      {msg && (
+        <p style={{
+          marginTop: 16,
+          textAlign: 'center',
+          color:     msg.includes('başarılı') ? '#388E3C' : '#D32F2F'
+        }}>{msg}</p>
+      )}
     </div>
   );
 }

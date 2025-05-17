@@ -6,94 +6,94 @@ export default function Layout({ page, token, onNav, onLogout, children }) {
     display:        'flex',
     justifyContent: 'space-between',
     alignItems:     'center',
-    padding:        '0 20px',
-    height:         60,
-    background:     '#4A148C', // deep purple
-    color:          'white',
-    fontFamily:     'sans-serif',
+    padding:        '0 24px',
+    height:         64,
+    background:     '#6A1B9A',   // derin mor
+    color:          '#fff',
+    fontFamily:     'Arial, sans-serif',
   };
-
-  const brandStyle = {
+  const leftGroup = {
     display:    'flex',
     alignItems: 'center',
-    gap:        12,
+    gap:        16,
   };
-
-  const titleStyle = {
-    fontSize:   22,
-    fontWeight: 'bold',
-  };
-
   const navStyle = {
+    display:    'flex',
+    gap:        12,
+    marginLeft: 24,
+  };
+  const rightGroup = {
     display: 'flex',
-    alignItems: 'center',
-    gap: 16,
+    gap:     12,
+    alignItems: 'center'
   };
-
-  const btnBase = {
-    border:       'none',
-    padding:      '6px 12px',
-    borderRadius: 4,
-    cursor:       'pointer',
-    fontSize:     14,
+  const btn = {
+    border:        'none',
+    padding:       '8px 16px',
+    borderRadius:  4,
+    cursor:        'pointer',
+    fontSize:      14,
+    background:    'transparent',
+    color:         '#fff',
   };
-
-  const linkBtn = {
-    ...btnBase,
-    background: 'transparent',
-    color:      'white',
-  };
-
-  const loginBtn = {
-    ...btnBase,
-    background: '#9575CD',  // light purple
-    color:      'white',
-  };
-
-  const logoutBtn = {
-    ...btnBase,
-    background: '#D1C4E9',  // pale purple
-    color:      '#4A148C',
+  const btnPrimary = {
+    ...btn,
+    background:    '#9575CD',  // açık mor
   };
 
   return (
     <>
       <header style={headerStyle}>
-        {/* Sol: logo + başlık */}
-        <div style={brandStyle}>
+        {/* sol taraf: logo + menüler */}
+        <div style={leftGroup}>
           <img
             src="/logo.png"
             alt="JobPortal"
-            style={{ height: 40, width: 40, objectFit: 'contain' }}
+            style={{ height: 40, objectFit: 'contain' }}
           />
-          <span style={titleStyle}>JobPortal</span>
+          <span style={{ fontSize: 20, fontWeight: 'bold' }}>
+            JobPortal
+          </span>
+          <nav style={navStyle}>
+            <button style={btn} onClick={() => onNav('jobs')}>
+              İlanlar
+            </button>
+            {token && (
+              <>
+                <button style={btn} onClick={() => onNav('new')}>
+                  Yeni İlan
+                </button>
+                <button style={btn} onClick={() => onNav('categories')}>
+                  Kategoriler
+                </button>
+                <button style={btn} onClick={() => onNav('profile')}>
+                  Profil
+                </button>
+              </>
+            )}
+          </nav>
         </div>
 
-        {/* Sağ: navigasyon + auth butonları */}
-        <div style={navStyle}>
-          {/* Ortak menüler */}
-          <button style={linkBtn} onClick={() => onNav('jobs')}>İlanlar</button>
-          {!token && (
-            <button style={linkBtn} onClick={() => onNav('register')}>Kayıt</button>
-          )}
-          {token && (
-            <>
-              <button style={linkBtn} onClick={() => onNav('new')}>Yeni İlan</button>
-              <button style={linkBtn} onClick={() => onNav('categories')}>Kategoriler</button>
-              <button style={linkBtn} onClick={() => onNav('profile')}>Profil</button>
-            </>
-          )}
-
-          {/* Auth butonları */}
+        {/* sağ taraf: oturum butonları */}
+        <div style={rightGroup}>
           {!token ? (
-            <button style={loginBtn} onClick={() => onNav('login')}>Giriş Yap</button>
+            <>
+              <button style={btn} onClick={() => onNav('register')}>
+                Kayıt Ol
+              </button>
+              <button style={btnPrimary} onClick={() => onNav('login')}>
+                Giriş Yap
+              </button>
+            </>
           ) : (
-            <button style={logoutBtn} onClick={onLogout}>Çıkış Yap</button>
+            <button style={btnPrimary} onClick={onLogout}>
+              Çıkış Yap
+            </button>
           )}
         </div>
       </header>
 
-      <main style={{ padding: 20 }}>
+      <main style={{ padding: 24, minHeight: 'calc(100vh - 64px)' }}>
         {children}
       </main>
     </>
