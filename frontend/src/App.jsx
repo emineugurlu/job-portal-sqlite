@@ -1,15 +1,25 @@
 import React, { useState } from 'react';
-import Register from './Register';
-import Login from './Login';
-
+import Register from './Register.jsx';
+import Login from './Login.jsx';
+import Jobs from './Jobs.jsx';
+import JobForm from './JobForm.jsx';
 
 export default function App() {
-  const [showLogin, setShowLogin] = useState(false);
+  const [page, setPage] = useState('jobs');
+
   return (
-    <div>
-      <button onClick={() => setShowLogin(false)}>Kayıt Ol</button>
-      <button onClick={() => setShowLogin(true)}>Giriş Yap</button>
-      {showLogin ? <Login /> : <Register />}
+    <div style={{ padding: 20 }}>
+      <nav style={{ marginBottom: 20 }}>
+        <button onClick={() => setPage('jobs')}>İlanlar</button>
+        <button onClick={() => setPage('new')}>Yeni İlan</button>
+        <button onClick={() => setPage('register')}>Kayıt</button>
+        <button onClick={() => setPage('login')}>Giriş</button>
+      </nav>
+
+      {page === 'jobs' && <Jobs />}
+      {page === 'new' && <JobForm onCreated={() => setPage('jobs')} />}
+      {page === 'register' && <Register />}
+      {page === 'login' && <Login />}
     </div>
   );
 }
