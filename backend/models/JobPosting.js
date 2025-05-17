@@ -12,6 +12,7 @@ const JobPosting = sequelize.define('JobPosting', {
   company: { type: DataTypes.STRING, allowNull: false },
   location: { type: DataTypes.STRING, allowNull: false },
   salary: { type: DataTypes.STRING },
+ attachment: { type: DataTypes.STRING }    // ← yeni alan
 }, {
   timestamps: true,
 });
