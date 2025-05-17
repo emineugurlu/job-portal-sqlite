@@ -1,22 +1,25 @@
 // frontend/src/App.jsx
+
 import React, { useState } from 'react';
-import Register  from './Register.jsx';
-import Login     from './Login.jsx';
-import Jobs      from './Jobs.jsx';
-import JobForm   from './JobForm.jsx';
-import JobEdit   from './JobEdit.jsx';
-import Category  from './Category.jsx';
+import Register   from './Register.jsx';
+import Login      from './Login.jsx';
+import Jobs       from './Jobs.jsx';
+import JobForm    from './JobForm.jsx';
+import JobEdit    from './JobEdit.jsx';
+import Category   from './Category.jsx';
+import Profile    from './Profile.jsx';
 
 export default function App() {
-  const [page, setPage]             = useState('jobs');
-  const [token, setToken]           = useState(localStorage.getItem('token'));
-  const [editingJobId, setEditing]  = useState(null);
+  const [page, setPage]            = useState('jobs');
+  const [token, setToken]          = useState(localStorage.getItem('token'));
+  const [editingJobId, setEditing] = useState(null);
 
   const handleLogin = newToken => {
     localStorage.setItem('token', newToken);
     setToken(newToken);
     setPage('jobs');
   };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     setToken(null);
@@ -29,6 +32,7 @@ export default function App() {
         <button onClick={() => setPage('jobs')}>İlanlar</button>
         {token && <button onClick={() => setPage('new')}>Yeni İlan</button>}
         {token && <button onClick={() => setPage('categories')}>Kategoriler</button>}
+        {token && <button onClick={() => setPage('profile')}>Profil</button>}
         {!token && <button onClick={() => setPage('register')}>Kayıt</button>}
         {!token && <button onClick={() => setPage('login')}>Giriş</button>}
         {token   && <button onClick={handleLogout}>Çıkış Yap</button>}
@@ -56,11 +60,13 @@ export default function App() {
         />
       )}
 
-      {page === 'categories' && <Category />}
+      {page === 'categories' && token && <Category />}
 
-      {page === 'register' && <Register />}
+      {page === 'profile' && token && <Profile />}
 
-      {page === 'login' && <Login onLogin={handleLogin} />}
+      {page === 'register' && !token && <Register />}
+
+      {page === 'login' && !token && <Login onLogin={handleLogin} />}
     </div>
   );
 }

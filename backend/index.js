@@ -1,18 +1,28 @@
 // backend/index.js
 
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+// ——— Dosya Sistemi & Yol Modülleri ———
+const fs   = require('fs');
 const path = require('path');
-const multer = require('multer');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { Op } = require('sequelize');
 
-const sequelize    = require('./db');
-const User         = require('./models/User');
-const JobPosting   = require('./models/JobPosting');
-const Category     = require('./models/Category');
+// ——— Gerekli Klasörleri Oluştur (uploads ve uploads/cvs) ———
+const uploadDir = path.join(__dirname, 'uploads');
+const cvsDir    = path.join(uploadDir, 'cvs');
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+if (!fs.existsSync(cvsDir))    fs.mkdirSync(cvsDir);
+
+// ——— Ortam Değişkenleri & Temel Kütüphaneler ———
+require('dotenv').config();
+const express    = require('express');
+const cors       = require('cors');
+const multer     = require('multer');
+const bcrypt     = require('bcryptjs');
+const jwt        = require('jsonwebtoken');
+const { Op }     = require('sequelize');
+
+const sequelize         = require('./db');
+const User              = require('./models/User');
+const JobPosting        = require('./models/JobPosting');
+const Category          = require('./models/Category');
 const authenticateToken = require('./middleware/auth');
 
 const app = express();
@@ -22,9 +32,9 @@ Category.hasMany(JobPosting,   { foreignKey: 'categoryId' });
 JobPosting.belongsTo(Category, { foreignKey: 'categoryId' });
 
 // ——— Multer Ayarları ———
-// Genel dosyalar (ilan ekleri)
+// 1) Genel dosyalar (ilan ekleri)
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, 'uploads')),
+  destination: (req, file, cb) => cb(null, uploadDir),
   filename:    (req, file, cb) => {
     const ext = file.originalname.split('.').pop();
     cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`);
@@ -32,9 +42,9 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// CV yüklemeleri
+// 2) CV yüklemeleri
 const cvStorage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, 'uploads', 'cvs')),
+  destination: (req, file, cb) => cb(null, cvsDir),
   filename:    (req, file, cb) => {
     const ext = file.originalname.split('.').pop();
     cb(null, `${req.user.id}-${Date.now()}.${ext}`);
@@ -45,10 +55,11 @@ const cvUpload = multer({ storage: cvStorage });
 // ——— Global Middleware ———
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// uploads klasörünü statik sun
+app.use('/uploads', express.static(uploadDir));
 
 // ——— DB Bağlantısı & Senkronizasyon ———
-(async () => {
+;(async () => {
   try {
     await sequelize.authenticate();
     await sequelize.sync({ alter: true });
@@ -120,18 +131,23 @@ app.put('/api/profile', authenticateToken, async (req, res) => {
 });
 
 // CV yükle
-app.post('/api/profile/cv', authenticateToken, cvUpload.single('cv'), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ error: 'Dosya seçilmedi' });
-    const user = await User.findByPk(req.user.id);
-    user.cv = `cvs/${req.file.filename}`;
-    await user.save();
-    res.json({ cv: user.cv });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'CV yükleme başarısız' });
+app.post(
+  '/api/profile/cv',
+  authenticateToken,
+  cvUpload.single('cv'),
+  async (req, res) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: 'Dosya seçilmedi' });
+      const user = await User.findByPk(req.user.id);
+      user.cv = `cvs/${req.file.filename}`;
+      await user.save();
+      res.json({ cv: user.cv });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'CV yükleme başarısız' });
+    }
   }
-});
+);
 
 // ——— Category Endpoints ———
 // Kategori listele
@@ -158,7 +174,7 @@ app.post('/api/categories', authenticateToken, async (req, res) => {
 });
 
 // ——— Job Posting CRUD ———
-// Oluştur (attachment + yetki)
+// 1) Oluştur (attachment + yetki)
 app.post(
   '/api/jobs',
   authenticateToken,
@@ -176,7 +192,7 @@ app.post(
   }
 );
 
-// Listele (search + pagination + sort + category filter)
+// 2) Listele (search + pagination + sort + category filter)
 app.get('/api/jobs', async (req, res) => {
   try {
     const {
@@ -223,7 +239,7 @@ app.get('/api/jobs', async (req, res) => {
   }
 });
 
-// Tek ilan getir
+// 3) Tek ilan getir
 app.get('/api/jobs/:id', async (req, res) => {
   try {
     const job = await JobPosting.findByPk(req.params.id, {
@@ -237,7 +253,7 @@ app.get('/api/jobs/:id', async (req, res) => {
   }
 });
 
-// Güncelle (attachment + yetki)
+// 4) Güncelle (attachment + yetki)
 app.put(
   '/api/jobs/:id',
   authenticateToken,
@@ -257,7 +273,7 @@ app.put(
   }
 );
 
-// Sil (yetki)
+// 5) Sil (yetki)
 app.delete('/api/jobs/:id', authenticateToken, async (req, res) => {
   try {
     const job = await JobPosting.findByPk(req.params.id);
