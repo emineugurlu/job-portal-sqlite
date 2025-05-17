@@ -1,6 +1,6 @@
 // frontend/src/JobForm.jsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function JobForm({ onCreated }) {
   const [form, setForm] = useState({
@@ -8,9 +8,19 @@ export default function JobForm({ onCreated }) {
     company: '',
     location: '',
     salary: '',
-    description: ''
+    description: '',
+    categoryId: ''
   });
+  const [cats, setCats] = useState([]);
   const [msg, setMsg] = useState('');
+
+  // Kategorileri yükle
+  useEffect(() => {
+    fetch('/api/categories')
+      .then(res => res.json())
+      .then(data => setCats(data))
+      .catch(err => console.error('Kategoriler alınamadı:', err));
+  }, []);
 
   const handleChange = e =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -43,7 +53,8 @@ export default function JobForm({ onCreated }) {
           company: '',
           location: '',
           salary: '',
-          description: ''
+          description: '',
+          categoryId: ''
         });
       } else if (res.status === 401 || res.status === 403) {
         setMsg('Yetkisiz. Lütfen tekrar giriş yapın.');
@@ -81,6 +92,17 @@ export default function JobForm({ onCreated }) {
           onChange={handleChange}
           required
         /><br/><br/>
+        <select
+          name="categoryId"
+          value={form.categoryId}
+          onChange={handleChange}
+          required
+        >
+          <option value="">Kategori seçin</option>
+          {cats.map(c => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select><br/><br/>
         <input
           name="salary"
           placeholder="Maaş"

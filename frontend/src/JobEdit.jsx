@@ -4,26 +4,37 @@ import React, { useState, useEffect } from 'react';
 
 export default function JobEdit({ jobId, onUpdated, onCancel }) {
   const [form, setForm] = useState({
-    title: '',
-    company: '',
-    location: '',
-    salary: '',
-    description: ''
+    title:       '',
+    company:     '',
+    location:    '',
+    salary:      '',
+    description: '',
+    categoryId:  ''      // ← burayı ekledik
   });
-  const [msg, setMsg] = useState('');
+  const [cats, setCats] = useState([]);
+  const [msg, setMsg]   = useState('');
 
-  // Mevcut ilanı getir ve formu doldur (GET herkese açık olduğu için header gerek yok)
   useEffect(() => {
+    // 1) İlan verisini yükle
     fetch(`/api/jobs/${jobId}`)
-      .then(res => res.json())
-      .then(data => setForm({
-        title: data.title,
-        company: data.company,
-        location: data.location,
-        salary: data.salary || '',
-        description: data.description
-      }))
-      .catch(() => setMsg('İlan yüklenemedi'));
+      .then(r => r.json())
+      .then(job => {
+        setForm({
+          title:       job.title,
+          company:     job.company,
+          location:    job.location,
+          salary:      job.salary || '',
+          description: job.description,
+          categoryId:  job.categoryId || ''  // ← burada alıyoruz
+        });
+      })
+      .catch(console.error);
+
+    // 2) Kategori listesini yükle
+    fetch('/api/categories')
+      .then(r => r.json())
+      .then(setCats)
+      .catch(console.error);
   }, [jobId]);
 
   const handleChange = e =>
@@ -31,36 +42,26 @@ export default function JobEdit({ jobId, onUpdated, onCancel }) {
 
   const handleSubmit = async e => {
     e.preventDefault();
-
-    // 1) Önce token'ı oku
     const token = localStorage.getItem('token');
     if (!token) {
-      setMsg('Önce giriş yapmalısınız.');
+      setMsg('Önce giriş yapın.');
       return;
     }
 
-    // 2) PUT isteğine Authorization header ekle
-    try {
-      const res = await fetch(`/api/jobs/${jobId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(form)
-      });
-
-      if (res.ok) {
-        setMsg('Güncellendi!');
-        onUpdated();
-      } else if (res.status === 401 || res.status === 403) {
-        setMsg('Yetkisiz. Lütfen tekrar giriş yapın.');
-      } else {
-        const data = await res.json();
-        setMsg(data.error || 'Güncelleme başarısız');
-      }
-    } catch {
-      setMsg('Sunucuya bağlanılamadı');
+    const res = await fetch(`/api/jobs/${jobId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(form)
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setMsg('Güncelleme başarılı!');
+      onUpdated();
+    } else {
+      setMsg(data.error || 'Güncelleme başarısız.');
     }
   };
 
@@ -68,6 +69,7 @@ export default function JobEdit({ jobId, onUpdated, onCancel }) {
     <div style={{ maxWidth: 600, margin: 'auto', padding: 20 }}>
       <h2>İlanı Düzenle</h2>
       <form onSubmit={handleSubmit}>
+        {/* Başlık, Firma, Konum…  */}
         <input
           name="title"
           placeholder="Başlık"
@@ -89,6 +91,20 @@ export default function JobEdit({ jobId, onUpdated, onCancel }) {
           onChange={handleChange}
           required
         /><br/><br/>
+
+        {/* → BURASI: Kategori Seçici */}
+        <select
+          name="categoryId"
+          value={form.categoryId}
+          onChange={handleChange}
+          required
+        >
+          <option value="">Kategori seçin</option>
+          {cats.map(c => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select><br/><br/>
+
         <input
           name="salary"
           placeholder="Maaş"
@@ -103,7 +119,9 @@ export default function JobEdit({ jobId, onUpdated, onCancel }) {
           required
         /><br/><br/>
         <button type="submit">Güncelle</button>
-        <button type="button" onClick={onCancel} style={{ marginLeft: 10 }}>İptal</button>
+        <button type="button" onClick={onCancel} style={{ marginLeft: 8 }}>
+          İptal
+        </button>
       </form>
       {msg && <p>{msg}</p>}
     </div>
