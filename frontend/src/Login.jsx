@@ -1,13 +1,11 @@
 // frontend/src/Login.jsx
 import React, { useState } from 'react';
+import './App.css'; // veya kendi stil dosyan
 
 export default function Login({ onLogin }) {
-  const [form, setForm] = useState({ email: '', password: '' });
-  const [message, setMessage] = useState('');
-
-  const handleChange = e => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const [email, setEmail]       = useState('');
+  const [password, setPassword] = useState('');
+  const [msg, setMsg]           = useState('');
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -15,45 +13,50 @@ export default function Login({ onLogin }) {
       const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ email, password })
       });
       const data = await res.json();
       if (res.ok) {
-        // 1) localStorage'a sakla
-        // 2) App'e bildir
         onLogin(data.token);
-        setMessage('Giriş başarılı!');
       } else {
-        setMessage(data.error || 'Giriş başarısız.');
+        setMsg(data.error || 'Giriş başarısız');
       }
     } catch {
-      setMessage('Sunucuya bağlanılamadı.');
+      setMsg('Sunucuya bağlanılamadı');
     }
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: 'auto', padding: 20 }}>
-      <h2>Giriş Yap</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          required
-        /><br /><br />
-        <input
-          type="password"
-          name="password"
-          placeholder="Şifre"
-          value={form.password}
-          onChange={handleChange}
-          required
-        /><br /><br />
-        <button type="submit">Giriş Yap</button>
-      </form>
-      {message && <p>{message}</p>}
+    <div className="container">
+      <div className="card">
+        <div className="card-header">Hoş Geldiniz</div>
+        <form onSubmit={handleSubmit}>
+          <input
+            className="input"
+            type="text"
+            placeholder="Kullanıcı Adı veya E-posta"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+          />
+          <input
+            className="input"
+            type="password"
+            placeholder="Şifre"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+          />
+          {msg && <p style={{ color: '#ffcccb', textAlign: 'center' }}>{msg}</p>}
+          <button className="btn" type="submit">Giriş</button>
+        </form>
+        <button
+          className="btn btn--facebook"
+          onClick={() => window.alert('Facebook ile Giriş (henüz yok)')}
+        >
+          Facebook ile Giriş Yap
+        </button>
+      </div>
     </div>
   );
 }

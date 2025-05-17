@@ -1,0 +1,71 @@
+/* App.css */
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f0f2f5;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.card {
+  background: #283593;       /* koyu indigo */
+  padding: 24px;
+  border-radius: 12px;
+  width: 320px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.card-header {
+  background: #fdd835;       /* sarı */
+  color: #283593;
+  text-align: center;
+  border-radius: 20px;
+  padding: 6px 0;
+  margin-bottom: 24px;
+  font-weight: bold;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 20px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.6);
+}
+
+.btn {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-radius: 20px;
+  background: #fff;
+  color: #283593;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+
+.btn:hover {
+  background: #f5f5f5;
+}
+
+.btn--facebook {
+  background: #1877f2;
+  color: #fff;
+}
+
+.btn--facebook:hover {
+  background: #166fe5;
+}

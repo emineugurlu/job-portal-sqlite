@@ -1,59 +1,52 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function Category() {
-  const [categories, setCategories] = useState([]);
+  const [cats, setCats] = useState([]);
   const [name, setName] = useState('');
   const [msg, setMsg] = useState('');
 
   const fetchCats = async () => {
     const res = await fetch('/api/categories');
-    const data = await res.json();
-    setCategories(data);
+    setCats(await res.json());
   };
 
-  useEffect(() => {
-    fetchCats();
-  }, []);
-
-  const handleCreate = async e => {
+  const handleSubmit = async e => {
     e.preventDefault();
     const token = localStorage.getItem('token');
-    if (!token) return setMsg('Önce giriş yapın.');
     const res = await fetch('/api/categories', {
       method: 'POST',
-      headers: {
+      headers: { 
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({ name })
     });
     if (res.ok) {
-      setMsg('Kategori oluşturuldu!');
-      setName('');
-      fetchCats();
+      setName(''); 
+      fetchCats(); 
+      setMsg('Kategori eklendi');
     } else {
-      const err = await res.json();
-      setMsg(err.error || 'Hata');
+      setMsg('Hata oluştu');
     }
   };
 
+  useEffect(() => { fetchCats(); }, []);
+
   return (
-    <div style={{ maxWidth: 400, margin: 'auto', padding: 20 }}>
+    <div style={{ maxWidth:600, margin:'auto', padding:20 }}>
       <h2>Kategoriler</h2>
-      <form onSubmit={handleCreate}>
-        <input
-          placeholder="Yeni kategori adı"
+      <form onSubmit={handleSubmit}>
+        <input 
           value={name}
           onChange={e => setName(e.target.value)}
+          placeholder="Yeni kategori"
           required
         />
-        <button style={{ marginLeft: 8 }}>Ekle</button>
+        <button type="submit">Ekle</button>
       </form>
       {msg && <p>{msg}</p>}
-      <ul style={{ marginTop: 20 }}>
-        {categories.map(c => (
-          <li key={c.id}>{c.name}</li>
-        ))}
+      <ul>
+        {cats.map(c => <li key={c.id}>{c.name}</li>)}
       </ul>
     </div>
   );

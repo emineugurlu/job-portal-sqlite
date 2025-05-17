@@ -1,91 +1,76 @@
 // frontend/src/Profile.jsx
-
 import React, { useState, useEffect } from 'react';
 
 export default function Profile() {
-  const [profile, setProfile] = useState(null);
-  const [name, setName]       = useState('');
+  const [profile, setProfile]   = useState(null);
+  const [name, setName]         = useState('');
   const [password, setPassword] = useState('');
-  const [file, setFile]       = useState(null);
-  const [message, setMessage] = useState('');
+  const [cvFile, setCvFile]     = useState(null);
+  const [msg, setMsg]           = useState('');
 
-  // Kullanıcının profilini çek
-  useEffect(() => {
+  // 1) Profile yükleyecek async fonksiyon
+  const loadProfile = async () => {
     const token = localStorage.getItem('token');
-    fetch('/api/profile', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(data => {
-        setProfile(data);
-        setName(data.name);
-      })
-      .catch(() => setMessage('Profil alınamadı'));
+    console.log('🔑 loading profile, token=', token);
+    try {
+      const res = await fetch('/api/profile', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log('📥 /api/profile status=', res.status);
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      console.log('✅ profile data=', data);
+      setProfile(data);
+      setName(data.name);
+    } catch (err) {
+      console.error('❌ loadProfile error', err);
+      setMsg('Profil yüklenemedi');
+    }
+  };
+
+  // 2) useEffect içinde async fonksiyonu çağırıyoruz
+  useEffect(() => {
+    loadProfile();
   }, []);
 
-  // Profil güncelle
-  const handleUpdate = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/profile', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ name, password })
-    });
-    if (res.ok) {
-      setMessage('Profil güncellendi!');
-      setPassword('');
-    } else {
-      setMessage('Profil güncelleme başarısız');
-    }
-  };
+  // 3) Render öncesi basit hata / yükleniyor kontrolü
+  if (msg) return <p style={{ color: 'red' }}>{msg}</p>;
+  if (!profile) return <p>Yükleniyor…</p>;
 
-  // CV dosyası seçildi
-  const handleFileChange = e => {
-    setFile(e.target.files[0]);
-  };
-
-  // CV yükle
-  const handleCvUpload = async () => {
-    if (!file) {
-      setMessage('Önce bir dosya seçin');
-      return;
-    }
-    const token = localStorage.getItem('token');
-    const form = new FormData();
-    form.append('cv', file);
-
-    const res = await fetch('/api/profile/cv', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
-      body: form
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      // profile.cv güncelle
-      setProfile(prev => ({ ...prev, cv: data.cv }));
-      setMessage('CV yüklendi!');
-    } else {
-      setMessage('CV yükleme başarısız');
-    }
-  };
-
-  if (!profile) return <p>Yükleniyor...</p>;
-
+  // 4) Burası artık hata olmadan render edecektir
   return (
-    <div style={{ maxWidth: 600, margin: 'auto', padding: 20 }}>
+    <div style={{ maxWidth:600, margin:'auto', padding:20 }}>
       <h2>Profilim</h2>
       <p><strong>Email:</strong> {profile.email}</p>
 
-      <div style={{ marginBottom: 20 }}>
+      <form onSubmit={e => {
+        e.preventDefault();
+        (async () => {
+          const token = localStorage.getItem('token');
+          const res = await fetch('/api/profile', {
+            method: 'PUT',
+            headers: {
+              'Content-Type':'application/json',
+              'Authorization':`Bearer ${token}`
+            },
+            body: JSON.stringify({ name, password })
+          });
+          if (res.ok) {
+            setMsg('Profil güncellendi');
+            setPassword('');
+            loadProfile();
+          } else {
+            setMsg('Güncelleme başarısız');
+          }
+        })();
+      }}>
         <label>İsim:</label><br/>
         <input
-          type="text"
           value={name}
           onChange={e => setName(e.target.value)}
+          required
         /><br/><br/>
 
         <label>Yeni Şifre:</label><br/>
@@ -95,34 +80,46 @@ export default function Profile() {
           onChange={e => setPassword(e.target.value)}
         /><br/><br/>
 
-        <button onClick={handleUpdate}>Güncelle</button>
-      </div>
+        <button type="submit">Güncelle</button>
+      </form>
 
-      <hr/>
+      <hr style={{ margin:'20px 0' }}/>
 
-      <div>
-        <h3>CV</h3>
+      <h3>CV {profile.cv && (
+        <a
+          href={`/uploads/${profile.cv}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          [Göster]
+        </a>
+      )}</h3>
 
-        {/* Eğer daha önce yüklenmiş bir CV varsa linki göster */}
-        {profile.cv && (
-          <p>
-            <a
-              href={`/uploads/${profile.cv}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              [Göster]
-            </a>
-          </p>
-        )}
+      <input
+        type="file"
+        accept=".pdf,.doc,.docx"
+        onChange={e => setCvFile(e.target.files[0])}
+      /><br/><br/>
 
-        <input type="file" onChange={handleFileChange} />
-        {file && <span style={{ marginLeft: 10 }}>{file.name}</span>}<br/><br/>
+      <button onClick={async () => {
+        if (!cvFile) return setMsg('Önce dosya seçin');
+        const token = localStorage.getItem('token');
+        const fd = new FormData();
+        fd.append('cv', cvFile);
+        const res = await fetch('/api/profile/cv', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: fd
+        });
+        if (res.ok) {
+          setMsg('CV yüklendi!');
+          loadProfile();
+        } else {
+          setMsg('CV yükleme başarısız');
+        }
+      }}>CV Yükle</button>
 
-        <button onClick={handleCvUpload}>CV Yükle</button>
-      </div>
-
-      {message && <p style={{ marginTop: 20 }}>{message}</p>}
+      {msg && <p style={{ marginTop:20 }}>{msg}</p>}
     </div>
   );
 }

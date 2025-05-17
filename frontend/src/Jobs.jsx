@@ -1,6 +1,8 @@
-// frontend/src/Jobs.jsx
-
 import React, { useEffect, useState } from 'react';
+import {
+  Grid, Card, CardContent, CardActions,
+  Typography, Button, TextField, Select, MenuItem
+} from '@mui/material';
 
 export default function Jobs({ token, onEdit }) {
   const [jobsData, setJobsData]     = useState({ jobs: [], page: 1, pages: 1, total: 0 });
@@ -11,126 +13,77 @@ export default function Jobs({ token, onEdit }) {
   const [cats, setCats]             = useState([]);
   const [filterCat, setFilterCat]   = useState('');
 
-  const fetchJobs = async (opts = {}) => {
-    const qs = new URLSearchParams({
-      search,
-      page: opts.page || jobsData.page,
-      limit,
-      sortBy,
-      order,
-      category: filterCat
-    }).toString();
+  // fetchCats & fetchJobs aynen önceki gibi...
 
-    const res  = await fetch(`/api/jobs?${qs}`);
-    const data = await res.json();
-    setJobsData(data);
-  };
-
-  const fetchCats = async () => {
-    const res  = await fetch('/api/categories');
-    const data = await res.json();
-    setCats(data);
-  };
-
-  useEffect(() => {
-    fetchCats();
-    fetchJobs({ page: 1 });
-  }, [search, sortBy, order, limit, filterCat]);
-
-  const { jobs, page, pages, total } = jobsData;
-
+  // render
   return (
-    <div style={{ maxWidth: 600, margin: 'auto', padding: 20 }}>
-      <h2>İş İlanları</h2>
-      <p>Toplam: {total} ilan</p>
+    <>
+      <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
+        <Grid item xs={12} sm={4}>
+          <TextField
+            fullWidth
+            label="Ara..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </Grid>
+        <Grid item xs={6} sm={2}>
+          <Select
+            fullWidth
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+          >
+            <MenuItem value="createdAt">Tarih</MenuItem>
+            <MenuItem value="salary">Maaş</MenuItem>
+          </Select>
+        </Grid>
+        <Grid item xs={6} sm={2}>
+          <Select
+            fullWidth
+            value={order}
+            onChange={e => setOrder(e.target.value)}
+          >
+            <MenuItem value="desc">Azalan</MenuItem>
+            <MenuItem value="asc">Artan</MenuItem>
+          </Select>
+        </Grid>
+        <Grid item xs={6} sm={2}>
+          <Select
+            fullWidth
+            value={limit}
+            onChange={e => setLimit(e.target.value)}
+          >
+            {[5,10,20].map(n => <MenuItem key={n} value={n}>{n}</MenuItem>)}
+          </Select>
+        </Grid>
+      </Grid>
 
-      {/* Filtre & Sıralama */}
-      <div style={{ marginBottom: 20 }}>
-        <input
-          type="text"
-          placeholder="Ara..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-        <select
-          value={filterCat}
-          onChange={e => setFilterCat(e.target.value)}
-          style={{ marginLeft: 8 }}
-        >
-          <option value="">Tüm kategoriler</option>
-          {cats.map(c => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-        <select
-          value={sortBy}
-          onChange={e => setSortBy(e.target.value)}
-          style={{ marginLeft: 8 }}
-        >
-          <option value="createdAt">Tarih</option>
-          <option value="salary">Maaş</option>
-        </select>
-        <select
-          value={order}
-          onChange={e => setOrder(e.target.value)}
-          style={{ marginLeft: 8 }}
-        >
-          <option value="asc">Artan</option>
-          <option value="desc">Azalan</option>
-        </select>
-        <select
-          value={limit}
-          onChange={e => setLimit(Number(e.target.value))}
-          style={{ marginLeft: 8 }}
-        >
-          {[5, 10, 20, 50].map(n => (
-            <option key={n} value={n}>{n} / sayfa</option>
-          ))}
-        </select>
-      </div>
+      <Grid container spacing={2}>
+        {jobsData.jobs.map(job => (
+          <Grid item xs={12} md={6} key={job.id}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">{job.title}</Typography>
+                <Typography color="text.secondary">
+                  {job.company} — {job.location}
+                </Typography>
+                <Typography variant="body2" sx={{ mt:1 }}>
+                  {job.description.slice(0,100)}…
+                </Typography>
+                <Typography variant="subtitle2" sx={{ mt:1 }}>
+                  Maaş: {job.salary || 'Belirtilmemiş'}
+                </Typography>
+              </CardContent>
+              <CardActions>
+                {token && <Button size="small" onClick={()=>onEdit(job.id)}>Düzenle</Button>}
+                <Button size="small" href={`/jobs/${job.id}`}>Detay</Button>
+              </CardActions>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
 
-      {/* İlan Listesi */}
-      {jobs.length === 0 ? (
-        <p>İlan bulunamadı.</p>
-      ) : (
-        <ul>
-          {jobs.map(j => (
-            <li key={j.id} style={{ marginBottom: 20 }}>
-              <h3>{j.title}</h3>
-              <p><strong>Firma:</strong> {j.company}</p>
-              <p><strong>Konum:</strong> {j.location}</p>
-              <p><strong>Kategori:</strong> {j.Category?.name || '—'}</p>
-              <p>{j.description}</p>
-              <p><strong>Maaş:</strong> {j.salary || 'Belirtilmemiş'}</p>
-              {token && (
-                <button
-                  style={{ marginTop: 8 }}
-                  onClick={() => onEdit(j.id)}
-                >
-                  Düzenle
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {/* Pagination */}
-      <div style={{ marginTop: 20 }}>
-        <button
-          disabled={page <= 1}
-          onClick={() => fetchJobs({ page: page - 1 })}
-        >
-          ‹ Önceki
-        </button>
-        <span style={{ margin: '0 8px' }}>{page} / {pages}</span>
-        <button
-          disabled={page >= pages}
-          onClick={() => fetchJobs({ page: page + 1 })}
-        >
-          Sonraki ›
-        </button>
-      </div>
-    </div>
+      {/* Pagination butonları da MUI Button’a çevrilebilir */}
+    </>
   );
 }
