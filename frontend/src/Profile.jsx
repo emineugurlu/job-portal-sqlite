@@ -1,125 +1,122 @@
-// frontend/src/Profile.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
+import './Profile.css'
 
 export default function Profile() {
-  const [profile, setProfile]   = useState(null);
-  const [name, setName]         = useState('');
-  const [password, setPassword] = useState('');
-  const [cvFile, setCvFile]     = useState(null);
-  const [msg, setMsg]           = useState('');
+  const [profile, setProfile] = useState(null)
+  const [name, setName]       = useState('')
+  const [password, setPassword] = useState('')
+  const [cvFile, setCvFile]   = useState(null)
+  const [msg, setMsg]         = useState('')
 
-  // 1) Profile yükleyecek async fonksiyon
-  const loadProfile = async () => {
-    const token = localStorage.getItem('token');
-    console.log('🔑 loading profile, token=', token);
+  const token = localStorage.getItem('token')
+
+  // Profil verisini çek
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const res = await fetch('/api/profile', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const data = await res.json()
+        setProfile(data)
+        setName(data.name)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    fetchProfile()
+  }, [token])
+
+  // İsim/şifre güncelle
+  const updateProfile = async e => {
+    e.preventDefault()
     try {
       const res = await fetch('/api/profile', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      console.log('📥 /api/profile status=', res.status);
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
+        method:  'PUT',
+        headers: {
+          'Content-Type':  'application/json',
+          Authorization:   `Bearer ${token}`
+        },
+        body: JSON.stringify({ name, password })
+      })
+      if (res.ok) {
+        setMsg('Profil güncellendi')
+        setPassword('')
+        setTimeout(() => setMsg(''), 2000)
+      } else {
+        setMsg('Güncelleme başarısız')
       }
-      const data = await res.json();
-      console.log('✅ profile data=', data);
-      setProfile(data);
-      setName(data.name);
-    } catch (err) {
-      console.error('❌ loadProfile error', err);
-      setMsg('Profil yüklenemedi');
+    } catch {
+      setMsg('Sunucu hatası')
     }
-  };
+  }
 
-  // 2) useEffect içinde async fonksiyonu çağırıyoruz
-  useEffect(() => {
-    loadProfile();
-  }, []);
+  // CV yükleme
+  const uploadCv = async () => {
+    if (!cvFile) {
+      setMsg('Önce dosya seçin')
+      return
+    }
+    const fd = new FormData()
+    fd.append('cv', cvFile)
+    try {
+      const res = await fetch('/api/profile/cv', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: fd
+      })
+      if (res.ok) {
+        setMsg('CV yüklendi!')
+        setTimeout(() => setMsg(''), 2000)
+      } else {
+        setMsg('CV yükleme başarısız')
+      }
+    } catch {
+      setMsg('Sunucu hatası')
+    }
+  }
 
-  // 3) Render öncesi basit hata / yükleniyor kontrolü
-  if (msg) return <p style={{ color: 'red' }}>{msg}</p>;
-  if (!profile) return <p>Yükleniyor…</p>;
+  if (!profile) return <p className="loading">Yükleniyor…</p>
 
-  // 4) Burası artık hata olmadan render edecektir
   return (
-    <div style={{ maxWidth:600, margin:'auto', padding:20 }}>
-      <h2>Profilim</h2>
-      <p><strong>Email:</strong> {profile.email}</p>
+    <div className="profile-card">
+      <div className="profile-left">
+        <h2>Profilim</h2>
+        <p><strong>Email:</strong> {profile.email}</p>
+        <form className="profile-form" onSubmit={updateProfile}>
+          <label>İsim:</label>
+          <input
+            type="text"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            required
+          />
+          <label>Yeni Şifre:</label>
+          <input
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+          />
+          <button type="submit">Güncelle</button>
+        </form>
+        {msg && <div className="profile-msg">{msg}</div>}
+      </div>
 
-      <form onSubmit={e => {
-        e.preventDefault();
-        (async () => {
-          const token = localStorage.getItem('token');
-          const res = await fetch('/api/profile', {
-            method: 'PUT',
-            headers: {
-              'Content-Type':'application/json',
-              'Authorization':`Bearer ${token}`
-            },
-            body: JSON.stringify({ name, password })
-          });
-          if (res.ok) {
-            setMsg('Profil güncellendi');
-            setPassword('');
-            loadProfile();
-          } else {
-            setMsg('Güncelleme başarısız');
-          }
-        })();
-      }}>
-        <label>İsim:</label><br/>
+      <div className="profile-right">
+        <h3>CV {profile.cv && (
+          <a
+            href={`/uploads/${profile.cv}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >[Göster]</a>
+        )}</h3>
         <input
-          value={name}
-          onChange={e => setName(e.target.value)}
-          required
-        /><br/><br/>
-
-        <label>Yeni Şifre:</label><br/>
-        <input
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-        /><br/><br/>
-
-        <button type="submit">Güncelle</button>
-      </form>
-
-      <hr style={{ margin:'20px 0' }}/>
-
-      <h3>CV {profile.cv && (
-        <a
-          href={`/uploads/${profile.cv}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          [Göster]
-        </a>
-      )}</h3>
-
-      <input
-        type="file"
-        accept=".pdf,.doc,.docx"
-        onChange={e => setCvFile(e.target.files[0])}
-      /><br/><br/>
-
-      <button onClick={async () => {
-        if (!cvFile) return setMsg('Önce dosya seçin');
-        const token = localStorage.getItem('token');
-        const fd = new FormData();
-        fd.append('cv', cvFile);
-        const res = await fetch('/api/profile/cv', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
-          body: fd
-        });
-        if (res.ok) {
-          setMsg('CV yüklendi!');
-          loadProfile();
-        } else {
-          setMsg('CV yükleme başarısız');
-        }
-      }}>CV Yükle</button>
-
-      {msg && <p style={{ marginTop:20 }}>{msg}</p>}
+          type="file"
+          accept=".pdf,.doc,.docx"
+          onChange={e => setCvFile(e.target.files[0])}
+        />
+        <button onClick={uploadCv}>CV Yükle</button>
+      </div>
     </div>
-  );
+  )
 }

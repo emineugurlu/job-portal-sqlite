@@ -1,53 +1,79 @@
 import React, { useState, useEffect } from 'react';
+import './Category.css';
 
 export default function Category() {
-  const [cats, setCats] = useState([]);
-  const [name, setName] = useState('');
-  const [msg, setMsg] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [newCat, setNewCat]         = useState('');
+  const [msg, setMsg]               = useState('');
 
-  const fetchCats = async () => {
-    const res = await fetch('/api/categories');
-    setCats(await res.json());
-  };
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/categories');
+        const data = await res.json();
+        setCategories(data);
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+  }, []);
 
-  const handleSubmit = async e => {
+  const handleAdd = async e => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/categories', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ name })
-    });
-    if (res.ok) {
-      setName(''); 
-      fetchCats(); 
-      setMsg('Kategori eklendi');
-    } else {
-      setMsg('Hata oluştu');
+    if (!newCat.trim()) return;
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: newCat })
+      });
+      if (!res.ok) throw new Error();
+      const created = await res.json();
+      setCategories([...categories, created]);
+      setNewCat('');
+      setMsg('Kategori eklendi!');
+      setTimeout(() => setMsg(''), 2000);
+    } catch {
+      setMsg('Sunucu hatası');
+      setTimeout(() => setMsg(''), 2000);
     }
   };
 
-  useEffect(() => { fetchCats(); }, []);
-
   return (
-    <div style={{ maxWidth:600, margin:'auto', padding:20 }}>
-      <h2>Kategoriler</h2>
-      <form onSubmit={handleSubmit}>
-        <input 
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="Yeni kategori"
-          required
-        />
-        <button type="submit">Ekle</button>
-      </form>
-      {msg && <p>{msg}</p>}
-      <ul>
-        {cats.map(c => <li key={c.id}>{c.name}</li>)}
-      </ul>
+    <div className="category-card">
+      <div className="category-left">
+        <h2>Kategoriler</h2>
+        <p>
+          İlanlarınızı kategorilere ayırarak
+          kullanıcıların aradıklarını daha
+          hızlı bulmasını sağlayın.
+        </p>
+      </div>
+
+      <div className="category-right">
+        <form className="category-form" onSubmit={handleAdd}>
+          <input
+            className="category-input"
+            placeholder="Yeni kategori"
+            value={newCat}
+            onChange={e => setNewCat(e.target.value)}
+          />
+          <button className="category-button">Ekle</button>
+        </form>
+        {msg && <div className="category-msg">{msg}</div>}
+
+        <ul className="category-list">
+          {categories.map(c => (
+            <li key={c.id} className="category-item">
+              {c.name}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

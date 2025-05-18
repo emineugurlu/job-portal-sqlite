@@ -1,0 +1,74 @@
+/* Kategori kartı: iki sütunlu, gölgelendirme & border-radius */
+.category-card {
+  max-width: 800px;
+  margin:    40px auto;
+  display:   flex;
+  border-radius: 8px;
+  overflow:  hidden;
+  box-shadow:   0 4px 16px rgba(0,0,0,0.1);
+  font-family:  Arial, sans-serif;
+}
+
+/* Sol panel: kısa tanıtım bölümü */
+.category-left {
+  flex:       1;
+  background: #CE93D8;  /* Açık mor */
+  color:      #fff;
+  padding:    40px;
+}
+.category-left h2 {
+  margin:       0 0 16px;
+  font-size:    24px;
+}
+.category-left p {
+  line-height: 1.5;
+}
+
+/* Sağ panel: form + liste */
+.category-right {
+  flex:      1;
+  background: #fff;
+  padding:    40px;
+}
+
+/* Form stili */
+.category-form {
+  display:      flex;
+  gap:          8px;
+  margin-bottom: 16px;
+}
+.category-input {
+  flex:          1;
+  padding:       8px 12px;
+  border:        1px solid #B39DDB;
+  border-radius: 4px;
+  outline:       none;
+  font-size:     14px;
+}
+.category-button {
+  padding:       8px 16px;
+  background:    #6A1B9A;  /* Koyu mor */
+  color:         #fff;
+  border:        none;
+  border-radius: 4px;
+  cursor:        pointer;
+  font-size:     14px;
+}
+
+/* Kısa mesaj */
+.category-msg {
+  color:     #388E3C;
+  margin-top: 4px;
+}
+
+/* Kategori listesi */
+.category-list {
+  list-style:    none;
+  padding:       0;
+  margin:        0;
+}
+.category-item {
+  padding:      8px 12px;
+  border-bottom: 1px solid #EEE;
+  font-size:     16px;
+}

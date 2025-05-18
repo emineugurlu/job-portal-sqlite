@@ -1,0 +1,92 @@
+/* Profil kartı — iki sütunlu düzen */
+.profile-card {
+  max-width:    800px;
+  margin:       40px auto;
+  display:      flex;
+  border-radius: 8px;
+  overflow:     hidden;
+  box-shadow:   0 4px 16px rgba(0,0,0,0.1);
+  font-family:  Arial, sans-serif;
+  background:   #fff;
+}
+
+/* Sol bölüm — form */
+.profile-left {
+  flex:       1;
+  padding:    40px;
+}
+.profile-left h2 {
+  margin-bottom: 16px;
+  font-size:     24px;
+}
+.profile-left p {
+  margin-bottom: 24px;
+}
+.profile-form {
+  display:       flex;
+  flex-direction: column;
+  gap:           12px;
+}
+.profile-form label {
+  font-weight: 500;
+}
+.profile-form input {
+  padding:       8px 12px;
+  border:        1px solid #B39DDB;
+  border-radius: 4px;
+  outline:       none;
+  font-size:     14px;
+}
+.profile-form button {
+  width:          fit-content;
+  padding:        8px 16px;
+  background:     #6A1B9A;
+  color:          #fff;
+  border:         none;
+  border-radius:  4px;
+  cursor:         pointer;
+  font-size:      14px;
+}
+.profile-msg {
+  margin-top: 12px;
+  color:      #388E3C;
+}
+
+/* Sağ bölüm — CV yükleme */
+.profile-right {
+  flex:       1;
+  padding:    40px;
+  border-left: 1px solid #EEE;
+  display:    flex;
+  flex-direction: column;
+  gap:        16px;
+}
+.profile-right h3 {
+  margin:       0;
+  font-size:    20px;
+}
+.profile-right a {
+  margin-left: 8px;
+  color:       #6A1B9A;
+  text-decoration: none;
+}
+.profile-right input[type="file"] {
+  font-size: 14px;
+}
+.profile-right button {
+  width:          fit-content;
+  padding:        8px 16px;
+  background:     #6A1B9A;
+  color:          #fff;
+  border:         none;
+  border-radius:  4px;
+  cursor:         pointer;
+  font-size:      14px;
+}
+
+/* Yükleme mesajı */
+.loading {
+  text-align: center;
+  margin-top: 60px;
+  font-size: 18px;
+}
