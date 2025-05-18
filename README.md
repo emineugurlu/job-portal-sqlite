@@ -16,7 +16,7 @@ A simple job-posting web application with user & admin roles, built with:
 1. **Clone**
 
    ```bash
-   git clone https://github.com/your-username/job-portal.git
+   git clone https://github.com/emineugurlu/job-portal.git
    cd job-portal
 cd backend
 npm install
