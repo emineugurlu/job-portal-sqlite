@@ -75,5 +75,12 @@ Use the provided /scripts/seed-admin.js to bootstrap an admin user.
 ![image](https://github.com/user-attachments/assets/c25295a8-38a0-4110-b1e7-b2918b48084a)
 
 
+🤝 Contributing
+Fork & clone
 
+Create a feature branch
+
+Commit & push
+
+Open a pull request
 
