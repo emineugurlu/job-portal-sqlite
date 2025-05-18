@@ -1,6 +1,6 @@
 // frontend/src/App.jsx
 import React, { useState, useEffect } from 'react'
-import jwtDecode from 'jwt-decode'
+
 import Layout from './Layout'
 import Hero   from './Hero'
 
@@ -18,14 +18,22 @@ export default function App() {
   const [userRole, setUserRole]    = useState(null)
   const [editingJobId, setEditing] = useState(null)
 
-  // Token değiştiğinde role'u çıkar
+  // 1) Token değiştiğinde payload'tan role'u çıkarıp state'e yazıyoruz
   useEffect(() => {
     if (token) {
       try {
-        const { role } = jwtDecode(token)
-        setUserRole(role)
+        const base64Url = token.split('.')[1]
+        const base64    = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split('')
+            .map(c => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
+            .join('')
+        )
+        const payload = JSON.parse(jsonPayload)
+        setUserRole(payload.role)
       } catch (err) {
-        console.error('Token decode hatası:', err)
+        console.error('Token parse hatası:', err)
         setUserRole(null)
       }
     } else {
@@ -33,11 +41,11 @@ export default function App() {
     }
   }, [token])
 
+  // 2) Login'den hem token hem de user objesini alacak şekilde
   const handleLogin = ({ token: newToken, user }) => {
-    // Burada Login.jsx'den token ve user objesi nasıl geliyorsa ona göre uyarlayın
     localStorage.setItem('token', newToken)
     setToken(newToken)
-    setUserRole(user.role)     // ilk ayarlama
+    setUserRole(user.role)
     setPage('jobs')
   }
 
@@ -48,6 +56,7 @@ export default function App() {
     setPage('login')
   }
 
+  // 3) Sayfa seçimine göre hangi bileşeni göstereceğiz
   const renderPage = () => {
     if (page === 'home') {
       return <Hero onExplore={() => setPage('jobs')} />
@@ -58,7 +67,7 @@ export default function App() {
         return (
           <Jobs
             token={token}
-            userRole={userRole}      // mutlaka burada yollayın
+            userRole={userRole}
             onEdit={id => {
               setEditing(id)
               setPage('edit')
@@ -66,18 +75,22 @@ export default function App() {
           />
         )
       case 'new':
-        return token && userRole === 'admin'
+        // Sadece admin yeni ilan ekleyebilir
+        return (token && userRole === 'admin')
           ? <JobForm onCreated={() => setPage('jobs')} />
           : null
       case 'edit':
-        return token && userRole === 'admin'
+        // Sadece admin düzenleyebilir
+        return (token && userRole === 'admin')
           ? <JobEdit jobId={editingJobId} onUpdated={() => setPage('jobs')} onCancel={() => setPage('jobs')} />
           : null
       case 'categories':
-        return token && userRole === 'admin'
+        // Sadece admin kategori yönetebilir
+        return (token && userRole === 'admin')
           ? <Category />
           : null
       case 'profile':
+        // Tüm authenticated kullanıcılar
         return token
           ? <Profile />
           : null

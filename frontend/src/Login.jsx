@@ -15,9 +15,15 @@ export default function Login({ onLogin }) {
         body:    JSON.stringify({ email, password })
       });
       const data = await res.json();
-      if (res.ok) onLogin(data.token);
-      else setMsg(data.error || 'Giriş başarısız');
-    } catch {
+
+      if (res.ok) {
+        // Burada hem token hem de user objesini yolluyoruz
+        onLogin({ token: data.token, user: data.user });
+      } else {
+        setMsg(data.error || 'Giriş başarısız');
+      }
+    } catch (err) {
+      console.error(err);
       setMsg('Sunucu hatası');
     }
   };
@@ -53,7 +59,7 @@ export default function Login({ onLogin }) {
     marginBottom: '32px',
     fontSize:     '28px',
     fontWeight:   '600',
-    textAlign:    'center'    // ← burası eklendi
+    textAlign:    'center'
   };
 
   const input = {
