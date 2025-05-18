@@ -70,12 +70,16 @@ app.use('/uploads', express.static(uploadDir));
 })();
 
 // ——— Auth Endpoints ———
-// Kayıt
+
+// Kayıt: varsayılan rol 'user'
 app.post('/api/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const hash = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hash });
+    const user = await User.create({
+      name, email, password: hash,
+      role: 'user'    // admin eklemek istiyorsan DB üzerinden manuel atayabilirsin
+    });
     res.json({ id: user.id, name: user.name, email: user.email });
   } catch (err) {
     console.error(err);
@@ -83,7 +87,7 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// Giriş
+// Giriş: JWT içinde id + role
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -93,8 +97,21 @@ app.post('/api/login', async (req, res) => {
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ error: 'Şifre yanlış' });
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    res.json({ token, user: { id: user.id, name: user.name, email: user.email, cv: user.cv } });
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        cv: user.cv
+      }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Sunucu hatası' });
@@ -102,11 +119,12 @@ app.post('/api/login', async (req, res) => {
 });
 
 // ——— Profile Endpoints ———
-// Profil getir
+
+// Profil getir (her auth kullanıcı)
 app.get('/api/profile', authenticateToken, async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id, {
-      attributes: ['id', 'name', 'email', 'cv']
+      attributes: ['id', 'name', 'email', 'cv', 'role']
     });
     res.json(user);
   } catch (err) {
@@ -115,7 +133,7 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// Profil güncelle
+// Profil güncelle (her auth kullanıcı)
 app.put('/api/profile', authenticateToken, async (req, res) => {
   try {
     const { name, password } = req.body;
@@ -123,14 +141,14 @@ app.put('/api/profile', authenticateToken, async (req, res) => {
     if (name)     user.name     = name;
     if (password) user.password = await bcrypt.hash(password, 10);
     await user.save();
-    res.json({ id: user.id, name: user.name, email: user.email, cv: user.cv });
+    res.json({ id: user.id, name: user.name, email: user.email, cv: user.cv, role: user.role });
   } catch (err) {
     console.error(err);
     res.status(400).json({ error: 'Profil güncelleme başarısız' });
   }
 });
 
-// CV yükle
+// CV yükle (her auth kullanıcı)
 app.post(
   '/api/profile/cv',
   authenticateToken,
@@ -150,7 +168,8 @@ app.post(
 );
 
 // ——— Category Endpoints ———
-// Kategori listele
+
+// Kategori listele (herkese açık)
 app.get('/api/categories', async (req, res) => {
   try {
     const categories = await Category.findAll();
@@ -161,8 +180,9 @@ app.get('/api/categories', async (req, res) => {
   }
 });
 
-// Kategori oluştur (yetki)
+// Kategori oluştur (sadece admin)
 app.post('/api/categories', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Yetersiz yetki' });
   try {
     const { name } = req.body;
     const category = await Category.create({ name });
@@ -174,12 +194,14 @@ app.post('/api/categories', authenticateToken, async (req, res) => {
 });
 
 // ——— Job Posting CRUD ———
-// 1) Oluştur (attachment + yetki)
+
+// 1) Oluştur (sadece admin)
 app.post(
   '/api/jobs',
   authenticateToken,
   upload.single('attachment'),
   async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Yetersiz yetki' });
     try {
       const data = { ...req.body };
       if (req.file) data.attachment = req.file.filename;
@@ -192,7 +214,7 @@ app.post(
   }
 );
 
-// 2) Listele (search + pagination + sort + category filter)
+// 2) Listele (herkese açık)
 app.get('/api/jobs', async (req, res) => {
   try {
     const {
@@ -221,15 +243,15 @@ app.get('/api/jobs', async (req, res) => {
 
     const { count, rows } = await JobPosting.findAndCountAll({
       where,
-      order: [[sortBy, order.toUpperCase()]],
-      limit: limNum,
+      order:  [[sortBy, order.toUpperCase()]],
+      limit:  limNum,
       offset,
-      include: [{ model: Category, attributes: ['id', 'name'] }]
+      include: [{ model: Category, attributes: ['id','name'] }]
     });
 
     res.json({
       total: count,
-      pages: Math.ceil(count / limNum),
+      pages: Math.ceil(count/limNum),
       page:  pageNum,
       jobs:  rows
     });
@@ -239,11 +261,11 @@ app.get('/api/jobs', async (req, res) => {
   }
 });
 
-// 3) Tek ilan getir
+// 3) Tek ilan getir (herkese açık)
 app.get('/api/jobs/:id', async (req, res) => {
   try {
     const job = await JobPosting.findByPk(req.params.id, {
-      include: [{ model: Category, attributes: ['id', 'name'] }]
+      include: [{ model: Category, attributes: ['id','name'] }]
     });
     if (!job) return res.status(404).json({ error: 'İlan bulunamadı' });
     res.json(job);
@@ -253,12 +275,13 @@ app.get('/api/jobs/:id', async (req, res) => {
   }
 });
 
-// 4) Güncelle (attachment + yetki)
+// 4) Güncelle (sadece admin)
 app.put(
   '/api/jobs/:id',
   authenticateToken,
   upload.single('attachment'),
   async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Yetersiz yetki' });
     try {
       const job = await JobPosting.findByPk(req.params.id);
       if (!job) return res.status(404).json({ error: 'İlan bulunamadı' });
@@ -273,8 +296,9 @@ app.put(
   }
 );
 
-// 5) Sil (yetki)
+// 5) Sil (sadece admin)
 app.delete('/api/jobs/:id', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Yetersiz yetki' });
   try {
     const job = await JobPosting.findByPk(req.params.id);
     if (!job) return res.status(404).json({ error: 'İlan bulunamadı' });
