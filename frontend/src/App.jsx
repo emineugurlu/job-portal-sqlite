@@ -1,4 +1,5 @@
 // frontend/src/App.jsx
+
 import React, { useState, useEffect } from 'react'
 import Layout from './Layout'
 import Hero   from './Hero'
@@ -17,19 +18,26 @@ export default function App() {
   const [userRole, setUserRole]    = useState(null)
   const [editingJobId, setEditing] = useState(null)
 
-  // Token değiştiğinde payload'dan role'u al
+  // ①: token değiştiğinde profile’ı çek
   useEffect(() => {
-    if (token) {
-      try {
-        // Token = header.payload.signature
-        const payload = JSON.parse(atob(token.split('.')[1]))
-        setUserRole(payload.role)
-      } catch {
-        setUserRole(null)
-      }
-    } else {
+    if (!token) {
       setUserRole(null)
+      return
     }
+
+    fetch('/api/profile', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Yetkisiz')
+        return res.json()
+      })
+      .then(data => {
+        setUserRole(data.role)      // backend’den dönen role
+      })
+      .catch(() => {
+        setUserRole(null)
+      })
   }, [token])
 
   const handleLogin = newToken => {
@@ -54,42 +62,24 @@ export default function App() {
         return (
           <Jobs
             token={token}
-            onEdit={id => {
-              setEditing(id)
-              setPage('edit')
-            }}
+            userRole={userRole}
+            onEdit={id => { setEditing(id); setPage('edit') }}
           />
         )
       case 'new':
-        return token && userRole === 'admin'
-          ? <JobForm onCreated={() => setPage('jobs')} />
-          : null
+        return (token && userRole === 'admin') ? <JobForm onCreated={() => setPage('jobs')} /> : null
       case 'edit':
-        return token && userRole === 'admin'
-          ? (
-            <JobEdit
-              jobId={editingJobId}
-              onUpdated={() => setPage('jobs')}
-              onCancel={() => setPage('jobs')}
-            />
-          )
+        return (token && userRole === 'admin')
+          ? <JobEdit jobId={editingJobId} onUpdated={() => setPage('jobs')} onCancel={() => setPage('jobs')} />
           : null
       case 'categories':
-        return token && userRole === 'admin'
-          ? <Category />
-          : null
+        return (token && userRole === 'admin') ? <Category /> : null
       case 'profile':
-        return token
-          ? <Profile />
-          : null
+        return token ? <Profile /> : null
       case 'register':
-        return !token
-          ? <Register />
-          : null
+        return !token ? <Register /> : null
       case 'login':
-        return !token
-          ? <Login onLogin={handleLogin} />
-          : null
+        return !token ? <Login onLogin={handleLogin} /> : null
       default:
         return null
     }

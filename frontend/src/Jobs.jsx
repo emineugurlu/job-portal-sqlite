@@ -1,47 +1,12 @@
 // frontend/src/Jobs.jsx
 import React, { useEffect, useState } from 'react';
 
-export default function Jobs({ token, onEdit }) {
+export default function Jobs({ token, userRole, onEdit }) {
   const [jobsData, setJobsData] = useState({ jobs: [], page: 1, pages: 1, total: 0 });
   const [search, setSearch]   = useState('');
   const [sortBy, setSortBy]   = useState('createdAt');
   const [order, setOrder]     = useState('desc');
   const [limit, setLimit]     = useState(10);
-
-  // Hero stilleri
-  const heroStyle = {
-    position:         'relative',
-    backgroundImage:  `url('/hero-bg.jpg')`,
-    backgroundSize:   'cover',
-    backgroundPosition:'center',
-    color:            '#fff',
-    padding:          '120px 20px',
-    marginBottom:     40,
-    textAlign:        'center',
-  };
-  const heroOverlay = {
-    position:  'absolute',
-    top:       0,
-    left:      0,
-    right:     0,
-    bottom:    0,
-    background:'rgba(74,20,140,0.65)', // yarı şeffaf mor
-  };
-  const heroContent = {
-    position: 'relative',
-    zIndex:   1,
-    maxWidth: 600,
-    margin:   '0 auto',
-  };
-  const heroTitle = {
-    fontSize:   36,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  };
-  const heroText = {
-    fontSize: 18,
-    lineHeight: 1.4
-  };
 
   // İlanları çek
   const fetchJobs = async opts => {
@@ -65,22 +30,10 @@ export default function Jobs({ token, onEdit }) {
 
   return (
     <div>
-      {/* HERO BANNER */}
-      <section style={heroStyle}>
-        <div style={heroOverlay}></div>
-        <div style={heroContent}>
-          <h1 style={heroTitle}>İŞ ARKADAŞI ARIYORUZ!</h1>
-          <p style={heroText}>
-            Ekibimize katılacak yeni yetenekler arıyoruz.<br/>
-            Özgeçmişinizi ve portföyünüzü <strong>merhaba@harikasite.com.tr</strong>’ye gönderin!
-          </p>
-        </div>
-      </section>
-
-      {/* Ara / filtre / sıralama */}
+      {/* Filtre / sıralama */}
       <div style={{
         maxWidth: 800,
-        margin: '0 auto 20px',
+        margin: '40px auto',
         display: 'flex',
         gap: 12,
         flexWrap: 'wrap'
@@ -119,39 +72,47 @@ export default function Jobs({ token, onEdit }) {
           value={limit}
           onChange={e => setLimit(Number(e.target.value))}
         >
-          {[5,10,20,50].map(n => <option key={n} value={n}>{n} / sayfa</option>)}
+          {[5,10,20,50].map(n => (
+            <option key={n} value={n}>{n} / sayfa</option>
+          ))}
         </select>
       </div>
 
       {/* İlan Listesi */}
       <div style={{ maxWidth:800, margin:'auto' }}>
         {jobs.length === 0 ? (
-          <p>İlan bulunamadı.</p>
+          <p style={{ textAlign: 'center' }}>İlan bulunamadı.</p>
         ) : (
           <ul style={{ listStyle:'none', padding:0 }}>
             {jobs.map(j => (
               <li key={j.id} style={{
                 border: '1px solid #E0E0E0',
-                borderRadius: 6,
+                borderRadius: 8,
                 padding: 20,
                 marginBottom: 16,
-                boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
+                boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+                position: 'relative'
               }}>
                 <h3 style={{ margin: '0 0 8px' }}>{j.title}</h3>
                 <p style={{ margin:4 }}><strong>Firma:</strong> {j.company}</p>
                 <p style={{ margin:4 }}><strong>Konum:</strong> {j.location}</p>
-                <p style={{ margin:4 }}>{j.description}</p>
                 <p style={{ margin:4 }}><strong>Maaş:</strong> {j.salary || 'Belirtilmemiş'}</p>
-                {token && (
+                <p style={{ margin: '12px 0 0' }}>{j.description}</p>
+
+                {/* Admin-only Düzenle Butonu */}
+                {token && userRole === 'admin' && (
                   <button
                     style={{
-                      marginTop: 12,
+                      position: 'absolute',
+                      top: 16,
+                      right: 16,
                       padding:'6px 12px',
                       background:'#6A1B9A',
                       color:'#fff',
                       border:'none',
                       borderRadius:4,
-                      cursor:'pointer'
+                      cursor:'pointer',
+                      fontSize: 12
                     }}
                     onClick={() => onEdit(j.id)}
                   >
@@ -166,16 +127,20 @@ export default function Jobs({ token, onEdit }) {
         {/* Pagination */}
         <div style={{ textAlign:'center', marginTop: 24 }}>
           <button
-            disabled={page<=1}
-            onClick={() => fetchJobs({ page: page-1 })}
+            disabled={page <= 1}
+            onClick={() => fetchJobs({ page: page - 1 })}
             style={{ marginRight:8 }}
-          >‹ Önceki</button>
+          >
+            ‹ Önceki
+          </button>
           <span>{page} / {pages}</span>
           <button
-            disabled={page>=pages}
-            onClick={() => fetchJobs({ page: page+1 })}
+            disabled={page >= pages}
+            onClick={() => fetchJobs({ page: page + 1 })}
             style={{ marginLeft:8 }}
-          >Sonraki ›</button>
+          >
+            Sonraki ›
+          </button>
         </div>
       </div>
     </div>
