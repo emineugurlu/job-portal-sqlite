@@ -27,6 +27,7 @@ npm install
 npm run dev
 VITE_API_BASE_URL=http://localhost:5000
 root
+
 ├── backend/
 │   ├── db.js              # Sequelize setup
 │   ├── index.js           # Express app & routes
