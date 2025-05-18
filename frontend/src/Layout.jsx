@@ -1,15 +1,15 @@
 // frontend/src/Layout.jsx
 import React from 'react';
 
-export default function Layout({ page, token, onNav, onLogout, children }) {
+export default function Layout({ page, token, userRole, onNav, onLogout, children }) {
   const headerStyle = {
-    display:        'flex',
-    alignItems:     'center',
-    padding:        '0 20px',
-    height:         60,
-    background:     '#6A1B9A',  // koyu mor
-    color:          'white',
-    fontFamily:     'sans-serif',
+    display:    'flex',
+    alignItems: 'center',
+    padding:    '0 20px',
+    height:     60,
+    background: '#6A1B9A',  // koyu mor
+    color:      'white',
+    fontFamily: 'sans-serif',
   };
 
   const leftGroup = {
@@ -19,10 +19,10 @@ export default function Layout({ page, token, onNav, onLogout, children }) {
   };
 
   const centerGroup = {
-    display:     'flex',
-    gap:         16,
-    marginLeft:  'auto',   // burası menüyü sağa iter
-    alignItems:  'center',
+    display:    'flex',
+    gap:        16,
+    marginLeft: 'auto',   // menüyü sağa iter
+    alignItems: 'center',
   };
 
   const rightGroup = {
@@ -72,7 +72,9 @@ export default function Layout({ page, token, onNav, onLogout, children }) {
           <button style={btnBase} onClick={() => onNav('jobs')}>
             İlanlar
           </button>
-          {token && (
+
+          {/* Sadece admin görebilir */}
+          {token && userRole === 'admin' && (
             <>
               <button style={btnBase} onClick={() => onNav('new')}>
                 Yeni İlan
@@ -80,11 +82,17 @@ export default function Layout({ page, token, onNav, onLogout, children }) {
               <button style={btnBase} onClick={() => onNav('categories')}>
                 Kategoriler
               </button>
-              <button style={btnBase} onClick={() => onNav('profile')}>
-                Profil
-              </button>
             </>
           )}
+
+          {/* Girişli herkes görebilir */}
+          {token && (
+            <button style={btnBase} onClick={() => onNav('profile')}>
+              Profil
+            </button>
+          )}
+
+          {/* Giriş yapmamış kullanıcılar */}
           {!token && (
             <button style={btnBase} onClick={() => onNav('register')}>
               Kayıt Ol

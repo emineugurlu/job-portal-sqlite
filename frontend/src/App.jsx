@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+// frontend/src/App.jsx
+import React, { useState, useEffect } from 'react'
 import Layout from './Layout'
 import Hero   from './Hero'
 
@@ -11,9 +12,25 @@ import Category from './Category'
 import Profile  from './Profile'
 
 export default function App() {
-  const [page, setPage]            = useState('home') // artık home
+  const [page, setPage]            = useState('home')
   const [token, setToken]          = useState(localStorage.getItem('token'))
+  const [userRole, setUserRole]    = useState(null)
   const [editingJobId, setEditing] = useState(null)
+
+  // Token değiştiğinde payload'dan role'u al
+  useEffect(() => {
+    if (token) {
+      try {
+        // Token = header.payload.signature
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        setUserRole(payload.role)
+      } catch {
+        setUserRole(null)
+      }
+    } else {
+      setUserRole(null)
+    }
+  }, [token])
 
   const handleLogin = newToken => {
     localStorage.setItem('token', newToken)
@@ -44,23 +61,35 @@ export default function App() {
           />
         )
       case 'new':
-        return token ? <JobForm onCreated={() => setPage('jobs')} /> : null
+        return token && userRole === 'admin'
+          ? <JobForm onCreated={() => setPage('jobs')} />
+          : null
       case 'edit':
-        return (
-          <JobEdit
-            jobId={editingJobId}
-            onUpdated={() => setPage('jobs')}
-            onCancel={() => setPage('jobs')}
-          />
-        )
+        return token && userRole === 'admin'
+          ? (
+            <JobEdit
+              jobId={editingJobId}
+              onUpdated={() => setPage('jobs')}
+              onCancel={() => setPage('jobs')}
+            />
+          )
+          : null
       case 'categories':
-        return token ? <Category /> : null
+        return token && userRole === 'admin'
+          ? <Category />
+          : null
       case 'profile':
-        return token ? <Profile /> : null
+        return token
+          ? <Profile />
+          : null
       case 'register':
-        return !token ? <Register /> : null
+        return !token
+          ? <Register />
+          : null
       case 'login':
-        return !token ? <Login onLogin={handleLogin} /> : null
+        return !token
+          ? <Login onLogin={handleLogin} />
+          : null
       default:
         return null
     }
@@ -70,7 +99,8 @@ export default function App() {
     <Layout
       page={page}
       token={token}
-      onNav={key => setPage(key)}
+      userRole={userRole}
+      onNav={setPage}
       onLogout={handleLogout}
     >
       {renderPage()}
