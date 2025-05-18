@@ -1,46 +1,37 @@
-// scripts/seed-admin.js
-
-require('dotenv').config();
+// backend/scripts/seed-admin.js
 const bcrypt = require('bcryptjs');
-const { Sequelize } = require('sequelize');
+const { Sequelize } = require('../db'); // db.js'de oluşturduğunuz sequelize örneği
+const User = require('../models/User');
 
-// Aynı `db.js` konfigürasyonunu buraya da import edin:
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: 'database.sqlite'  // db.js'deki storage yolunuza göre güncelleyin
-});
-
-// User modelini tanımlayın (db/models/User.js ile birebir olmalı):
-const User = sequelize.define('User', {
-  id:       { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
-  name:     { type: Sequelize.STRING, allowNull: false },
-  email:    { type: Sequelize.STRING, allowNull: false, unique: true },
-  password: { type: Sequelize.STRING, allowNull: false },
-  role:     { type: Sequelize.ENUM('user','admin'), allowNull: false, defaultValue: 'user' }
-}, {
-  tableName: 'Users',
-  timestamps: true
-});
-
-async function promoteToAdmin(email) {
+(async () => {
   try {
-    await sequelize.authenticate();
-    // Varolan kullanıcıyı bul
-    const user = await User.findOne({ where: { email } });
-    if (!user) {
-      console.log(`⚠️  Kullanıcı bulunamadı: ${email}`);
-      process.exit(1);
-    }
-    // role'ü güncelle
-    user.role = 'admin';
-    await user.save();
-    console.log(`✅  ${email} artık admin!`);
-    process.exit(0);
-  } catch (err) {
-    console.error(err);
-    process.exit(1);
-  }
-}
+    // veritabanına bağlantı + senkronizasyon (varsa)
+    await Sequelize.authenticate();
+    // eğer tablolar yoksa oluştur:
+    await Sequelize.sync();
 
-// Burada admin yapmak istediğiniz e-posta adresini girin:
-promoteToAdmin('admin@gmail.com');
+    const adminEmail = 'admin@site.com';
+    const adminPassword = 'admin123';
+
+    let admin = await User.findOne({ where: { email: adminEmail } });
+    if (!admin) {
+      const hash = await bcrypt.hash(adminPassword, 10);
+      admin = await User.create({
+        name: 'Yönetici',
+        email: adminEmail,
+        password: hash,
+        role: 'admin'
+      });
+      console.log(`Yeni admin oluşturuldu: ${adminEmail} / ${adminPassword}`);
+    } else {
+      // mevcut kullanıcıya admin yetkisi ver
+      admin.role = 'admin';
+      await admin.save();
+      console.log(`Var olan kullanıcıya admin yetkisi eklendi: ${adminEmail}`);
+    }
+  } catch (err) {
+    console.error('Admin seed hatası:', err);
+  } finally {
+    process.exit();
+  }
+})();
