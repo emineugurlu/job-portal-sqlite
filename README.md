@@ -53,9 +53,9 @@ This application focuses on **Scalable Backend Logic & State Management**:
    npm start
 
 2. **Setup Frontend:**
-````bash
+   ````bash
    cd ../frontend
    npm install
    npm run dev
-````
+   ````
 Developed by Emine Uğurlu - Computer Engineer.
