@@ -1,0 +1,23 @@
+name: Full-Stack Quality Check
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Backend Lint
+        run: |
+          cd backend
+          npm install
+          npx eslint . --fix-dry-run
+
+      - name: Frontend Lint
+        run: |
+          cd frontend
+          npm install
+          npx eslint src/**/*.{js,jsx} --fix-dry-run
