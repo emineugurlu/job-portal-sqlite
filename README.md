@@ -2,7 +2,7 @@
 
 > **"A robust Job-Board application featuring secure JWT authentication, relational data modeling with Sequelize, and a dynamic React-driven administrative interface."**
 
-![Repo Size](https://img.shields.io/github/repo-size/emineugurlu/job-portal?color=green&style=flat-square)
+![Repo Size](https://img.shields.io/github/repo-size/emineugurlu/job-portal-sqlite?color=green&style=flat-square)
 ![Stack](https://img.shields.io/badge/Stack-PERN--ish-blue?style=flat-square)
 ![Auth](https://img.shields.io/badge/Auth-JWT-orange?style=flat-square)
 
